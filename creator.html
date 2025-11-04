@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Peron Tips — Flier Creator (Updated)</title>
+  <title>Peron Tips — Flier Creator</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -12,13 +12,13 @@
     <header>
       <div>
         <h1>PERON TIPS — Flier Creator</h1>
-        <p class="small">Pick a template, customize, pay, and download</p>
+        <p class="small">Pick a template, customize, pay (via M-Pesa STK push) & download</p>
       </div>
       <div class="small"><a href="index.html" style="color:inherit;text-decoration:underline">Back to Categories</a></div>
     </header>
 
     <main class="grid">
-      <!-- LEFT PANEL -->
+      <!-- LEFT -->
       <section class="panel">
         <h3>Categories</h3>
         <div id="categories" class="categories"></div>
@@ -26,9 +26,10 @@
         <div id="templatesGrid" class="templates-grid"></div>
       </section>
 
-      <!-- MIDDLE: editor -->
+      <!-- CENTER -->
       <section class="panel">
         <h3>Customize</h3>
+
         <label>Template</label>
         <select id="templateSelect"></select>
 
@@ -43,11 +44,16 @@
           <div><label>Venue</label><input id="venueInput" type="text" placeholder="Nairobi Stadium"></div>
         </div>
 
-        <label>Contact (phone)</label>
-        <input id="contactInput" type="text" placeholder="07XXXXXXXX">
+        <label>Flier Contact</label>
+        <input id="contactInput" type="text" placeholder="0700 000 000">
 
         <label>Upload Photo</label>
         <input id="photoInput" type="file" accept="image/*">
+
+        <div class="field">
+          <label>Phone for payment (Use 07XXXXXXXX)</label>
+          <input id="paymentPhoneInput" type="tel" placeholder="07XXXXXXXX" />
+        </div>
 
         <div class="field">
           <label>Amount (KES) — Max <strong>30</strong></label>
@@ -63,12 +69,12 @@
         <div id="payStatus" class="small" style="margin-top:10px;color:#374151"></div>
       </section>
 
-      <!-- RIGHT: preview -->
+      <!-- RIGHT -->
       <section class="panel">
         <h3>Preview</h3>
         <div class="preview-wrap">
           <div id="flierPreview" class="flier">
-            <div id="heroArea" class="hero"><span id="heroText">Upload photo or this shows the title</span></div>
+            <div id="heroArea" class="hero"><span>Upload photo or this shows the title</span></div>
             <div class="flier-content">
               <h2 id="flierTitle">Sample Title</h2>
               <h3 id="flierSubtitle">Subtitle</h3>
@@ -90,7 +96,6 @@
     <footer>© <span id="year"></span> Peron Tips</footer>
   </div>
 
-  <!-- updated script that connects to backend -->
   <script src="script-updated.js"></script>
 </body>
   </html>
