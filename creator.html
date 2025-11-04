@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Peron Tips — Flier Creator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>PERON TIPS — Flier Creator</h1>
+        <p class="small">Pick a template, customize, pay, and download</p>
+      </div>
+      <div class="small"><a href="index.html" style="color:inherit;text-decoration:underline">Back to Categories</a></div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT PANEL -->
+      <section class="panel">
+        <h3>Categories</h3>
+        <div id="categories" class="categories"></div>
+        <input id="templateSearch" type="text" placeholder="Search templates...">
+        <div id="templatesGrid" class="templates-grid"></div>
+      </section>
+
+      <!-- MIDDLE: editor -->
+      <section class="panel">
+        <h3>Customize</h3>
+        <label>Template</label>
+        <select id="templateSelect"></select>
+
+        <label>Title</label><input id="titleInput" type="text" placeholder="Main title">
+
+        <label>Subtitle</label><input id="subtitleInput" type="text" placeholder="Subtitle">
+
+        <div class="row">
+          <div><label>Date</label><input id="dateInput" type="text" placeholder="12 Jul 2025"></div>
+          <div><label>Venue</label><input id="venueInput" type="text" placeholder="Nairobi Stadium"></div>
+        </div>
+
+        <label>Contact</label><input id="contactInput" type="text" placeholder="0700 000 000">
+
+        <label>Upload Photo</label><input id="photoInput" type="file" accept="image/*">
+
+        <div class="buttons">
+          <button id="buyBtn" class="btn primary">Buy (KES <span id="priceSpan">0</span>)</button>
+          <button id="resetPaymentBtn" class="btn ghost">Reset</button>
+          <button id="saveDraftBtn" class="btn ghost">Save Draft</button>
+        </div>
+      </section>
+
+      <!-- RIGHT: preview -->
+      <section class="panel">
+        <h3>Preview</h3>
+        <div class="preview-wrap">
+          <div id="flierPreview" class="flier">
+            <div id="heroArea" class="hero"><span id="heroText">Upload photo or this shows the title</span></div>
+            <div class="flier-content">
+              <h2 id="flierTitle">Sample Title</h2>
+              <h3 id="flierSubtitle">Subtitle</h3>
+              <p><strong>Date:</strong> <span id="flierDate">TBA</span></p>
+              <p><strong>Venue:</strong> <span id="flierVenue">TBA</span></p>
+              <p><strong>Contact:</strong> <span id="flierContact">TBA</span></p>
+            </div>
+            <div class="brand">Peron Tips <span id="flierPriceTag" class="price-tag">KES 0</span></div>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="downloadBtn" class="btn primary">Download PNG</button>
+          <button id="downloadPDFBtn" class="btn ghost">Download PDF</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>© <span id="year"></span> Peron Tips</footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
