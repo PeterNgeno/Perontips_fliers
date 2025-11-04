@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Peron Tips — Flier Creator</title>
+  <title>Peron Tips — Flier Creator (Updated)</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -32,24 +32,35 @@
         <label>Template</label>
         <select id="templateSelect"></select>
 
-        <label>Title</label><input id="titleInput" type="text" placeholder="Main title">
+        <label>Title</label>
+        <input id="titleInput" type="text" placeholder="Main title">
 
-        <label>Subtitle</label><input id="subtitleInput" type="text" placeholder="Subtitle">
+        <label>Subtitle</label>
+        <input id="subtitleInput" type="text" placeholder="Subtitle">
 
         <div class="row">
           <div><label>Date</label><input id="dateInput" type="text" placeholder="12 Jul 2025"></div>
           <div><label>Venue</label><input id="venueInput" type="text" placeholder="Nairobi Stadium"></div>
         </div>
 
-        <label>Contact</label><input id="contactInput" type="text" placeholder="0700 000 000">
+        <label>Contact (phone)</label>
+        <input id="contactInput" type="text" placeholder="07XXXXXXXX">
 
-        <label>Upload Photo</label><input id="photoInput" type="file" accept="image/*">
+        <label>Upload Photo</label>
+        <input id="photoInput" type="file" accept="image/*">
+
+        <div class="field">
+          <label>Amount (KES) — Max <strong>30</strong></label>
+          <input id="amountInput" type="number" min="1" max="30" value="30" />
+        </div>
 
         <div class="buttons">
           <button id="buyBtn" class="btn primary">Buy (KES <span id="priceSpan">0</span>)</button>
           <button id="resetPaymentBtn" class="btn ghost">Reset</button>
           <button id="saveDraftBtn" class="btn ghost">Save Draft</button>
         </div>
+
+        <div id="payStatus" class="small" style="margin-top:10px;color:#374151"></div>
       </section>
 
       <!-- RIGHT: preview -->
@@ -79,6 +90,7 @@
     <footer>© <span id="year"></span> Peron Tips</footer>
   </div>
 
-  <script src="script.js"></script>
+  <!-- updated script that connects to backend -->
+  <script src="script-updated.js"></script>
 </body>
-</html>
+  </html>
