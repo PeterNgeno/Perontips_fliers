@@ -1,97 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PERON TIPS — Flier Creator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Peron Tips — Categories</title>
   <link rel="stylesheet" href="style.css">
-  <!-- html2canvas CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <div>
-        <h1>PERON TIPS — Flier Creator</h1>
-        <p class="small">Pick a category → choose a template → customize → pay → download</p>
-      </div>
-      <div class="small">Demo mode — payments simulated</div>
+      <h1>PERON TIPS</h1>
+      <p class="small">Choose a category to create a flier</p>
     </header>
 
-    <main class="grid">
-      <!-- LEFT PANEL -->
-      <section class="panel">
-        <h3>Categories</h3>
-        <div id="categories" class="categories"></div>
+    <main class="menu-grid panel">
+      <h2 style="margin-top:0">Categories</h2>
 
-        <input id="templateSearch" type="text" placeholder="Search templates...">
-        <div id="templatesGrid" class="templates-grid"></div>
-      </section>
+      <!-- Category links: update these if you add/remove categories -->
+      <div class="category-links">
+        <a class="cat-link" href="creator.html?category=Church%20%26%20Faith-Based">Church &amp; Faith-Based</a>
+        <a class="cat-link" href="creator.html?category=Personal%20%26%20Family">Personal &amp; Family</a>
+        <a class="cat-link" href="creator.html?category=School%20%26%20Education">School &amp; Education</a>
+        <a class="cat-link" href="creator.html?category=Business%20%26%20Professional">Business &amp; Professional</a>
+        <a class="cat-link" href="creator.html?category=Community%20%26%20Social">Community &amp; Social</a>
+        <a class="cat-link" href="creator.html?category=Entertainment%20%26%20Creative">Entertainment &amp; Creative</a>
+        <a class="cat-link" href="creator.html?category=Personal%20Celebrations">Personal Celebrations</a>
+        <a class="cat-link" href="creator.html?category=Church%20Departments">Church Departments</a>
+        <!-- Add more category links here if you expand later -->
+      </div>
 
-      <!-- MIDDLE PANEL -->
-      <section class="panel">
-        <h3>Customize</h3>
-
-        <label>Template</label>
-        <select id="templateSelect"></select>
-
-        <label>Title</label>
-        <input id="titleInput" type="text" placeholder="Main title">
-
-        <label>Subtitle</label>
-        <input id="subtitleInput" type="text" placeholder="Subtitle">
-
-        <div class="row">
-          <div>
-            <label>Date</label>
-            <input id="dateInput" type="text" placeholder="12th July 2025">
-          </div>
-          <div>
-            <label>Venue</label>
-            <input id="venueInput" type="text" placeholder="Nairobi Stadium">
-          </div>
-        </div>
-
-        <label>Contact</label>
-        <input id="contactInput" type="text" placeholder="0700 000 000">
-
-        <label>Upload Photo</label>
-        <input id="photoInput" type="file" accept="image/*">
-
-        <div class="buttons">
-          <button id="buyBtn" class="btn primary">Buy (KES <span id="priceSpan">0</span>)</button>
-          <button id="resetPaymentBtn" class="btn ghost">Reset</button>
-          <button id="saveDraftBtn" class="btn ghost">Save Draft</button>
-        </div>
-      </section>
-
-      <!-- RIGHT PANEL -->
-      <section class="panel">
-        <h3>Preview</h3>
-        <div class="preview-wrap">
-          <div id="flierPreview" class="flier">
-            <div id="heroArea" class="hero"><span id="heroText">Upload photo or this area shows the title</span></div>
-            <div class="flier-content">
-              <h2 id="flierTitle">Sample Title</h2>
-              <h3 id="flierSubtitle">Subtitle here</h3>
-              <p><strong>Date:</strong> <span id="flierDate">TBA</span></p>
-              <p><strong>Venue:</strong> <span id="flierVenue">TBA</span></p>
-              <p><strong>Contact:</strong> <span id="flierContact">TBA</span></p>
-            </div>
-            <div class="brand">Peron Tips <span id="flierPriceTag" class="price-tag">KES 0</span></div>
-          </div>
-        </div>
-
-        <div class="buttons">
-          <button id="downloadBtn" class="btn primary">Download PNG</button>
-          <button id="downloadPDFBtn" class="btn ghost">Download PDF</button>
-        </div>
-      </section>
+      <p class="small" style="margin-top:12px">Tip: Click a category to open the flier creator with that category selected.</p>
     </main>
 
     <footer>© <span id="year"></span> Peron Tips</footer>
   </div>
 
-  <script src="script.js"></script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
-  </html>
+</html>
