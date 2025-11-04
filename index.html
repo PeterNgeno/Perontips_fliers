@@ -1,40 +1,253 @@
-<!doctype html>
+<!--
+PERON TIPS — Multi-category site
+This document contains multiple files. Copy each section into its own file on your server.
+
+Files included:
+  - index.html              -> Home page linking to per-category creator pages
+  - creator-personal.html   -> Creator/editor for Personal & Family Events
+  - creator-church.html     -> Creator/editor for Church & Faith-Based Events
+  - creator-education.html  -> Creator/editor for Education & Students
+  - creator-business.html   -> Creator/editor for Business & Professional
+  - creator-community.html  -> Creator/editor for Community & Social
+  - creator-creative.html   -> Creator/editor for Creative / Miscellaneous
+
+Each creator-*.html is a copy of the editor with category-specific title and a few default sample flyers. Replace flyers in the `flyers` array or upload your own PNG overlays into /flyers/.
+--><!-- ===================== index.html ===================== --><!doctype html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Peron Tips — Categories</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PERON TIPS — Home</title>
+  <style>
+    :root{--accent:#0b63d6;--muted:#6b7280}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:#fbfdff;color:#071126}
+    .wrap{max-width:980px;margin:36px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:28px;color:var(--accent)}
+    p.lead{margin:6px 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .card{background:#fff;padding:14px;border-radius:10px;border:1px solid #e6eefb}
+    .cat h3{margin:0 0 8px}
+    .btn{display:inline-block;background:var(--accent);color:white;padding:8px 10px;border-radius:8px;text-decoration:none}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <h1>PERON TIPS</h1>
-      <p class="small">Choose a category to create a flier</p>
-    </header>
-
-    <main class="menu-grid panel">
-      <h2 style="margin-top:0">Categories</h2>
-
-      <!-- Category links: update these if you add/remove categories -->
-      <div class="category-links">
-        <a class="cat-link" href="creator.html?category=Church%20%26%20Faith-Based">Church &amp; Faith-Based</a>
-        <a class="cat-link" href="creator.html?category=Personal%20%26%20Family">Personal &amp; Family</a>
-        <a class="cat-link" href="creator.html?category=School%20%26%20Education">School &amp; Education</a>
-        <a class="cat-link" href="creator.html?category=Business%20%26%20Professional">Business &amp; Professional</a>
-        <a class="cat-link" href="creator.html?category=Community%20%26%20Social">Community &amp; Social</a>
-        <a class="cat-link" href="creator.html?category=Entertainment%20%26%20Creative">Entertainment &amp; Creative</a>
-        <a class="cat-link" href="creator.html?category=Personal%20Celebrations">Personal Celebrations</a>
-        <a class="cat-link" href="creator.html?category=Church%20Departments">Church Departments</a>
-        <!-- Add more category links here if you expand later -->
+      <div>
+        <h1>PERON TIPS</h1>
+        <p class="lead">Pick a category and open its creator to customize fliers specific to that event type.</p>
       </div>
+    </header><main style="margin-top:20px">
+  <div class="grid">
+    <div class="card cat">
+      <h3>🎉 Personal & Family Events</h3>
+      <ul>
+        <li>Engagement / Proposal Announcement</li>
+        <li>Baby Shower</li>
+        <li>Anniversary</li>
+        <li>Family Reunion</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-personal.html">Open Creator →</a></div>
+    </div>
 
-      <p class="small" style="margin-top:12px">Tip: Click a category to open the flier creator with that category selected.</p>
-    </main>
+    <div class="card cat">
+      <h3>🙏 Church & Faith-Based Events</h3>
+      <ul>
+        <li>Revival Service</li>
+        <li>Youth Conference</li>
+        <li>Choir Concert / Worship Night</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-church.html">Open Creator →</a></div>
+    </div>
 
-    <footer>© <span id="year"></span> Peron Tips</footer>
+    <div class="card cat">
+      <h3>🏫 Education & Students</h3>
+      <ul>
+        <li>Academic Conference / Seminar</li>
+        <li>Parents' Day / Prize-Giving Day</li>
+        <li>Talent Show / Drama Festival</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-education.html">Open Creator →</a></div>
+    </div>
+
+    <div class="card cat">
+      <h3>💼 Business & Professional</h3>
+      <ul>
+        <li>Business Opening / Product Promotion</li>
+        <li>Training / Workshop</li>
+        <li>Job Vacancy / Career Fair</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-business.html">Open Creator →</a></div>
+    </div>
+
+    <div class="card cat">
+      <h3>💖 Community & Social</h3>
+      <ul>
+        <li>Charity Event / Fundraiser</li>
+        <li>Sports Tournament</li>
+        <li>Community Service</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-community.html">Open Creator →</a></div>
+    </div>
+
+    <div class="card cat">
+      <h3>🎨 Creative / Miscellaneous</h3>
+      <ul>
+        <li>Music Concert</li>
+        <li>Art Exhibition</li>
+        <li>Fashion Show</li>
+      </ul>
+      <div style="margin-top:8px"><a class="btn" href="creator-creative.html">Open Creator →</a></div>
+    </div>
   </div>
+</main>
 
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<footer style="margin-top:20px;color:var(--muted)">
+  <small>Tip: each creator page ships with sample flyer overlay paths. Replace or upload your own PNG overlays (transparent circular area) in /flyers/.</small>
+</footer>
+
+  </div>
 </body>
-</html>
+</html><!-- ===================== creator-template (copy as creator-personal.html, creator-church.html, etc.) ===================== --><!-- Example: creator-personal.html --><!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PERON TIPS — Creator (Personal & Family)</title>
+  <style>
+    :root{--accent:#0b63d6;--muted:#6b7280}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:#f5f9ff;color:#071126}
+    .wrap{max-width:1200px;margin:18px auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h2{color:var(--accent);margin:0}
+    .layout{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:14px}
+    .panel{background:white;padding:12px;border-radius:10px;border:1px solid #e6eefb}
+    .thumb{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#eaeef8}
+    .templates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eefb;margin-top:6px}
+    .small{font-size:13px;color:var(--muted)}
+    .stage{display:flex;align-items:center;justify-content:center;padding:12px}
+    canvas{background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(11,99,214,0.06)}
+    .toolbar{display:flex;gap:8px;margin-top:10px}
+    .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
+    .mutedbtn{background:#eef4ff;color:var(--accent);padding:8px;border-radius:8px;border:1px solid #dbefff}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h2>PERON TIPS — Personal & Family Creator</h2>
+        <div class="small">Templates tailored for personal & family events.</div>
+      </div>
+      <div>
+        <a class="mutedbtn" href="index.html">← Back</a>
+      </div>
+    </header><div class="layout">
+  <aside class="panel">
+    <h3 style="margin-top:0">Templates</h3>
+    <div class="templates" id="templates"></div>
+
+    <h4 style="margin-top:12px">Upload Photo</h4>
+    <input type="file" id="photoInput" accept="image/*">
+    <div class="small">Tip: choose a close-up portrait for best results.</div>
+
+    <h4 style="margin-top:12px">Text</h4>
+    <label>Headline</label>
+    <input id="headline" placeholder="e.g. Jane & John — Engagement">
+    <label>Details</label>
+    <textarea id="details" rows="3" placeholder="Date • Time • Venue"></textarea>
+    <label>Text color</label>
+    <input id="textColor" type="color" value="#ffffff">
+
+    <h4 style="margin-top:12px">Mask (circle)</h4>
+    <label>Move X</label>
+    <input id="maskX" type="range" min="0" max="100" value="50">
+    <label>Move Y</label>
+    <input id="maskY" type="range" min="0" max="100" value="28">
+    <label>Diameter</label>
+    <input id="maskD" type="range" min="10" max="100" value="48">
+
+    <div class="toolbar">
+      <button id="downloadBtn" class="btn">Generate & Download</button>
+      <button id="resetBtn" class="mutedbtn">Reset</button>
+    </div>
+  </aside>
+
+  <section>
+    <div class="panel" style="min-height:640px;display:flex;flex-direction:column">
+      <div class="stage" style="flex:1">
+        <canvas id="canvas" width="700" height="1000"></canvas>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+        <div class="small">Preview — align the circular window to match the transparent area of the overlay.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+  </div><script>
+// Sample flyers for this category: replace with real paths or upload to /flyers/
+const flyers = [
+  {id:'personal-1', name:'Round Classic', src:'flyers/personal1.png'},
+  {id:'personal-2', name:'Soft Blue', src:'flyers/personal2.png'},
+  {id:'personal-3', name:'Minimal Gold', src:'flyers/personal3.png'}
+];
+
+const templatesDiv = document.getElementById('templates');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let overlayImg = new Image();
+let photoImg = new Image();
+let photoLoaded=false;
+let chosen=null;
+const mask = {x:50,y:28,d:48};
+
+flyers.forEach(f=>{
+  const d = document.createElement('div'); d.style.cursor='pointer';
+  const img = document.createElement('img'); img.className='thumb'; img.src=f.src; img.alt=f.name; img.style.height='86px';
+  const lab = document.createElement('div'); lab.textContent=f.name; lab.style.fontSize='13px'; lab.style.marginTop='6px'; lab.style.color='#0b63d6';
+  d.appendChild(img); d.appendChild(lab);
+  d.onclick = ()=>selectTemplate(f);
+  templatesDiv.appendChild(d);
+});
+
+function selectTemplate(f){ chosen=f; overlayImg=new Image(); overlayImg.crossOrigin='anonymous'; overlayImg.src=f.src; overlayImg.onload = ()=>{ const maxW=900; const scale=Math.min(1,maxW/overlayImg.width); canvas.width=Math.round(overlayImg.width*scale); canvas.height=Math.round(overlayImg.height*scale); render(); } overlayImg.onerror=()=>alert('Could not load overlay: '+f.src); }
+
+document.getElementById('photoInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(!file) return; const url=URL.createObjectURL(file); photoImg=new Image(); photoImg.crossOrigin='anonymous'; photoImg.src=url; photoImg.onload=()=>{ photoLoaded=true; render(); URL.revokeObjectURL(url); }; });
+
+['headline','details','textColor','maskX','maskY','maskD'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', onInputChange); });
+function onInputChange(){ mask.x=Number(document.getElementById('maskX').value); mask.y=Number(document.getElementById('maskY').value); mask.d=Number(document.getElementById('maskD').value); render(); }
+
+function clear(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
+function render(){ clear(); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(photoLoaded){ const dia=canvas.width*(mask.d/100); const cx=canvas.width*(mask.x/100); const cy=canvas.height*(mask.y/100); ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.clip(); const iw=photoImg.width, ih=photoImg.height; const scale=Math.max(dia/iw,dia/ih); const sw=iw*scale, sh=ih*scale; ctx.drawImage(photoImg, cx-sw/2, cy-sh/2, sw, sh); ctx.restore(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth=Math.max(2,canvas.width/200); ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.stroke(); }
+  const headline=document.getElementById('headline').value||'Your Event Title'; const details=document.getElementById('details').value||'Date • Time • Venue'; const textColor=document.getElementById('textColor').value||'#ffffff'; ctx.textAlign='center'; ctx.fillStyle=textColor; ctx.font=`${Math.round(canvas.width/16)}px Inter, sans-serif`; wrapText(ctx, headline, canvas.width/2, canvas.height*0.55, canvas.width*0.86, Math.round(canvas.width/14)); ctx.font=`${Math.round(canvas.width/32)}px Inter, sans-serif`; wrapText(ctx, details, canvas.width/2, canvas.height*0.72, canvas.width*0.86, Math.round(canvas.width/28)); if(overlayImg && overlayImg.complete){ ctx.drawImage(overlayImg,0,0,canvas.width,canvas.height); } if(!overlayImg.complete){ ctx.beginPath(); const cx=canvas.width*(mask.x/100); const cy=canvas.height*(mask.y/100); const dia=canvas.width*(mask.d/100); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth=2; ctx.strokeStyle='rgba(11,99,214,0.25)'; ctx.stroke(); } }
+
+function wrapText(context,text,x,y,maxWidth,lineHeight){ const words=text.split(' '); let line=''; for(let n=0;n<words.length;n++){ const testLine=line+words[n]+' '; if(context.measureText(testLine).width>maxWidth && n>0){ context.fillText(line,x,y); line=words[n]+' '; y+=lineHeight; } else { line=testLine; } } context.fillText(line,x,y); }
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{ if(!chosen){ alert('Choose a template first.'); return; } render(); canvas.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='peron-'+(chosen?chosen.id:'custom')+'.png'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }, 'image/png'); });
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{ document.getElementById('headline').value=''; document.getElementById('details').value=''; document.getElementById('textColor').value='#ffffff'; document.getElementById('maskX').value=50; document.getElementById('maskY').value=28; document.getElementById('maskD').value=48; mask.x=50; mask.y=28; mask.d=48; render(); });
+
+// initial placeholder
+(function init(){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#6b7280'; ctx.font='18px Inter, sans-serif'; ctx.textAlign='center'; ctx.fillText('Choose a template and upload a photo to start', canvas.width/2, canvas.height/2 -10); })();
+</script></body>
+</html><!-- ===================== Duplicate notes ===================== --><!--
+To create the other creator pages, copy the "creator-template" section and save each copy with the file names:
+  - creator-personal.html
+  - creator-church.html
+  - creator-education.html
+  - creator-business.html
+  - creator-community.html
+  - creator-creative.html
+
+Then inside each file update the `flyers` array to point to templates appropriate for that category (e.g. flyers/church1.png etc.), and update the page title & heading text if desired.
+
+If you want, I can generate all six ready-made creator HTMLs here (with different sample flyer file names prefilled). Tell me and I will add them into this document now.
+-->
