@@ -1,172 +1,250 @@
-// --- DATA ---
+// --- DATA (categories & templates) ---
 const CATEGORIES = {
-  "Church & Faith-Based": ["Crusades","Youth Conference","Choir Concert","Ordination Ceremony"],
-  "Personal & Family": ["Wedding","Birthday","Graduation","Anniversary"],
-  "Business & Professional": ["Job Advertisement","Workshop","Business Launch"],
-  "Community & Social": ["Committee Meeting","Charity Event","Sports Tournament"],
-  "Entertainment & Creative": ["Music Concert","Fashion Show","Art Exhibition"]
+  "Church & Faith-Based":[ "Crusades","Revival Service","Youth Conference","Women’s Fellowship","Men’s Fellowship","Choir Concert","Bible Study","Ordination Ceremony","Thanksgiving Service" ],
+  "Personal & Family":[ "Wedding","Engagement","Bridal Shower","Baby Shower","Birthday","Anniversary","Graduation","House Warming","Funeral","Family Reunion" ],
+  "School & Education":[ "School Meeting","Success Card","Talent Show","Alumni Reunion","Parents' Day","Academic Conference" ],
+  "Business & Professional":[ "Job Advertisement","Business Launch","Product Promotion","Workshop / Training","Sales / Discount","Career Fair" ],
+  "Community & Social":[ "Committee Meeting","Charity Event","Sports Tournament","Cultural Festival","Political Rally" ],
+  "Entertainment & Creative":[ "Music Concert","Movie Night","Art Exhibition","Fashion Show","Talent Competition" ],
+  "Personal Celebrations":[ "Success Card","Congratulations","Achievement" ],
+  "Church Departments":[ "Youth Dept","Women Dept","Men Dept","Choir Dept" ]
 };
 
 const TEMPLATES = [
-  {id:"church1",title:"Crusade Night",category:"Church & Faith-Based",price:199,bg:"#0b3b6f",color:"#fff"},
-  {id:"wedding1",title:"Wedding",category:"Personal & Family",price:299,bg:"#db2777",color:"#fff"},
-  {id:"job1",title:"Job Vacancy",category:"Business & Professional",price:99,bg:"#111827",color:"#fff"},
-  {id:"birthday1",title:"Birthday Bash",category:"Personal & Family",price:149,bg:"#f59e0b",color:"#111827"}
+  {id:"church-1",title:"Crusade Night",category:"Church & Faith-Based",price:199,bg:"#0b3b6f",color:"#fff"},
+  {id:"choir-1",title:"Choir Concert",category:"Church & Faith-Based",price:179,bg:"#6b21a8",color:"#fff"},
+  {id:"wedding-1",title:"Elegant Wedding",category:"Personal & Family",price:299,bg:"#db2777",color:"#fff"},
+  {id:"birthday-1",title:"Birthday Bash",category:"Personal & Family",price:149,bg:"#f59e0b",color:"#111827"},
+  {id:"job-1",title:"Job Vacancy",category:"Business & Professional",price:99,bg:"#111827",color:"#fff"},
+  {id:"school-1",title:"Prize Giving",category:"School & Education",price:129,bg:"#065f46",color:"#fff"},
+  {id:"charity-1",title:"Fundraiser",category:"Community & Social",price:159,bg:"#f97316",color:"#111827"},
+  {id:"music-1",title:"Music Concert",category:"Entertainment & Creative",price:219,bg:"#0ea5e9",color:"#fff"},
+  {id:"graduation-1",title:"Graduation Ceremony",category:"Personal & Family",price:179,bg:"#0f172a",color:"#fff"},
+  {id:"committee-1",title:"Committee Meeting",category:"Community & Social",price:89,bg:"#94a3b8",color:"#111827"}
 ];
 
 // --- STATE ---
 let state = {
-  category: Object.keys(CATEGORIES)[0],
-  templateId: TEMPLATES[0].id,
-  fields: { title:TEMPLATES[0].title, subtitle:'', date:'', venue:'', contact:'' },
-  photo:null,
+  selectedCategory: Object.keys(CATEGORIES)[0],
+  selectedTemplateId: TEMPLATES[0].id,
+  fields: { title: TEMPLATES[0].title, subtitle:'Put your subtitle here', date:'', venue:'', contact:'' },
+  photoDataUrl: null,
   paid:false
 };
 
-// --- DOM ELEMENTS ---
-const cats = document.getElementById('categories');
-const grid = document.getElementById('templatesGrid');
-const tSelect = document.getElementById('templateSelect');
-const titleI = document.getElementById('titleInput');
-const subI = document.getElementById('subtitleInput');
-const dateI = document.getElementById('dateInput');
-const venueI = document.getElementById('venueInput');
-const contactI = document.getElementById('contactInput');
-const photoI = document.getElementById('photoInput');
+// --- DOM ---
+const categoriesEl = document.getElementById('categories');
+const templatesGridEl = document.getElementById('templatesGrid');
+const templateSelectEl = document.getElementById('templateSelect');
+const templateSearchEl = document.getElementById('templateSearch');
+const titleInput = document.getElementById('titleInput');
+const subtitleInput = document.getElementById('subtitleInput');
+const dateInput = document.getElementById('dateInput');
+const venueInput = document.getElementById('venueInput');
+const contactInput = document.getElementById('contactInput');
+const photoInput = document.getElementById('photoInput');
 const priceSpan = document.getElementById('priceSpan');
 const buyBtn = document.getElementById('buyBtn');
-const resetBtn = document.getElementById('resetPaymentBtn');
-const saveBtn = document.getElementById('saveDraftBtn');
-const flier = document.getElementById('flierPreview');
-const hero = document.getElementById('heroArea');
+const resetPaymentBtn = document.getElementById('resetPaymentBtn');
+const saveDraftBtn = document.getElementById('saveDraftBtn');
 const flierTitle = document.getElementById('flierTitle');
 const flierSubtitle = document.getElementById('flierSubtitle');
 const flierDate = document.getElementById('flierDate');
 const flierVenue = document.getElementById('flierVenue');
 const flierContact = document.getElementById('flierContact');
+const heroArea = document.getElementById('heroArea');
 const flierPriceTag = document.getElementById('flierPriceTag');
-const year = document.getElementById('year');
 const downloadBtn = document.getElementById('downloadBtn');
-const search = document.getElementById('templateSearch');
+const downloadPDFBtn = document.getElementById('downloadPDFBtn');
 
-year.textContent = new Date().getFullYear();
+// set year in footer
+document.getElementById('year').textContent = new Date().getFullYear();
 
-// --- RENDERING ---
+// --- helpers ---
+function getTemplateById(id){ return TEMPLATES.find(t=>t.id===id) || TEMPLATES[0]; }
+function queryStringCategory(){ // read ?category=...
+  const params = new URLSearchParams(window.location.search);
+  const c = params.get('category');
+  return c ? decodeURIComponent(c) : null;
+}
+
+// --- render ---
 function renderCategories(){
-  cats.innerHTML = '';
-  for(let c in CATEGORIES){
+  categoriesEl.innerHTML='';
+  Object.keys(CATEGORIES).forEach(cat=>{
     const btn = document.createElement('button');
-    btn.textContent = c;
-    btn.className = 'cat-btn' + (c===state.category?' active':'');
-    btn.onclick = ()=>{ state.category = c; renderTemplates(); renderCategories(); };
-    cats.appendChild(btn);
-  }
+    btn.className = 'cat-btn' + (state.selectedCategory===cat?' active':'');
+    btn.textContent = cat;
+    btn.onclick = ()=>{ state.selectedCategory = cat; renderTemplates(); renderCategories(); selectFirstInCategory(); };
+    categoriesEl.appendChild(btn);
+  });
 }
 
 function renderTemplates(){
-  grid.innerHTML='';
-  const q = search.value.toLowerCase();
-  const list = TEMPLATES.filter(t=>t.category===state.category && t.title.toLowerCase().includes(q));
-  list.forEach(t=>{
-    const card=document.createElement('div');
-    card.className='template-card';
-    card.innerHTML=`<div class='template-thumb' style='background:${t.bg}'>${t.title.split(' ')[0]}</div>
-                    <div class='template-meta'><h4>${t.title}</h4><p>${t.category} • KES ${t.price}</p></div>`;
-    card.onclick=()=>selectTemplate(t.id);
-    grid.appendChild(card);
-  });
+  const q = (templateSearchEl.value||'').toLowerCase();
+  templatesGridEl.innerHTML='';
+  const list = TEMPLATES.filter(t => t.category === state.selectedCategory && t.title.toLowerCase().includes(q));
+  if(list.length===0){
+    // show all templates in category if no search match
+    TEMPLATES.filter(t=>t.category===state.selectedCategory).forEach(t=>templatesGridEl.appendChild(renderTemplateCard(t)));
+    return;
+  }
+  list.forEach(t=>templatesGridEl.appendChild(renderTemplateCard(t)));
+}
+
+function renderTemplateCard(t){
+  const card = document.createElement('div');
+  card.className = 'template-card';
+  card.onclick = ()=>{ selectTemplate(t.id); };
+  const thumb = document.createElement('div');
+  thumb.className = 'template-thumb';
+  thumb.style.background = t.bg;
+  thumb.textContent = t.title.split(' ')[0];
+  const meta = document.createElement('div'); meta.className='template-meta';
+  meta.innerHTML = `<h4>${t.title}</h4><p>${t.category} • KES ${t.price}</p>`;
+  card.appendChild(thumb); card.appendChild(meta);
+  return card;
 }
 
 function renderTemplateSelect(){
-  tSelect.innerHTML='';
+  templateSelectEl.innerHTML='';
   TEMPLATES.forEach(t=>{
-    const opt=document.createElement('option');
-    opt.value=t.id; opt.textContent=`${t.title} — KES ${t.price}`;
-    tSelect.appendChild(opt);
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = `${t.title} — KES ${t.price}`;
+    templateSelectEl.appendChild(opt);
   });
-  tSelect.value=state.templateId;
-  updatePrice();
+  templateSelectEl.value = state.selectedTemplateId;
+  updatePriceDisplay();
 }
 
-function updatePrice(){
-  const t=getTemplate();
-  priceSpan.textContent=t.price;
-  flierPriceTag.textContent='KES '+t.price;
+function updatePriceDisplay(){
+  const t = getTemplateById(state.selectedTemplateId);
+  priceSpan.textContent = t.price;
+  flierPriceTag.textContent = 'KES ' + t.price;
 }
-
-function getTemplate(){ return TEMPLATES.find(t=>t.id===state.templateId); }
 
 function renderPreview(){
-  const t=getTemplate();
-  flierTitle.textContent=state.fields.title||'Title';
-  flierSubtitle.textContent=state.fields.subtitle||'';
-  flierDate.textContent=state.fields.date||'TBA';
-  flierVenue.textContent=state.fields.venue||'TBA';
-  flierContact.textContent=state.fields.contact||'TBA';
-  if(state.photo){
-    hero.innerHTML=`<img src='${state.photo}' style='width:100%;height:100%;object-fit:cover'>`;
+  flierTitle.textContent = state.fields.title || 'Title';
+  flierSubtitle.textContent = state.fields.subtitle || '';
+  flierDate.textContent = state.fields.date || 'TBA';
+  flierVenue.textContent = state.fields.venue || 'TBA';
+  flierContact.textContent = state.fields.contact || 'TBA';
+  const t = getTemplateById(state.selectedTemplateId);
+  if(state.photoDataUrl){
+    heroArea.style.background = 'transparent';
+    heroArea.innerHTML = `<img src="${state.photoDataUrl}" style="width:100%;height:100%;object-fit:cover" alt="photo">`;
   } else {
-    hero.style.background=t.bg;
-    hero.style.color=t.color;
-    hero.innerHTML=`<div style='text-align:center'><strong>${state.fields.title||t.title}</strong><div>${t.category}</div></div>`;
+    heroArea.style.background = t.bg;
+    heroArea.style.color = t.color || '#fff';
+    heroArea.innerHTML = `<div style="text-align:center;padding:8px"><div style="font-size:20px;font-weight:700">${(state.fields.title||t.title)}</div><div style="opacity:.85;margin-top:6px;font-size:13px">${t.category}</div></div>`;
   }
+  flierPriceTag.style.background = 'rgba(255,255,255,0.9)';
+  flierPriceTag.style.color = '#0b1220';
 }
 
-// --- EVENTS ---
+// --- selection & events ---
 function selectTemplate(id){
-  state.templateId=id;
-  const t=getTemplate();
-  state.fields.title=t.title;
-  titleI.value=t.title;
+  state.selectedTemplateId = id;
+  const t = getTemplateById(id);
+  state.fields.title = t.title;
+  state.fields.subtitle = 'Put your subtitle here';
+  state.photoDataUrl = null;
+  state.paid = false;
+  templateSelectEl.value = id;
+  titleInput.value = state.fields.title;
+  subtitleInput.value = state.fields.subtitle;
+  dateInput.value = '';
+  venueInput.value = '';
+  contactInput.value = '';
+  updatePriceDisplay();
   renderPreview();
-  updatePrice();
 }
 
-tSelect.onchange=()=>selectTemplate(tSelect.value);
-search.oninput=()=>renderTemplates();
+function selectFirstInCategory(){
+  const first = TEMPLATES.find(t=>t.category===state.selectedCategory);
+  if(first) selectTemplate(first.id);
+}
 
-titleI.oninput=()=>{state.fields.title=titleI.value;renderPreview();};
-subI.oninput=()=>{state.fields.subtitle=subI.value;renderPreview();};
-dateI.oninput=()=>{state.fields.date=dateI.value;renderPreview();};
-venueI.oninput=()=>{state.fields.venue=venueI.value;renderPreview();};
-contactI.oninput=()=>{state.fields.contact=contactI.value;renderPreview();};
+templateSelectEl.addEventListener('change', (e)=> selectTemplate(e.target.value));
+templateSearchEl.addEventListener('input', ()=> renderTemplates());
 
-photoI.onchange=(e)=>{
-  const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{state.photo=ev.target.result;renderPreview();};
-  r.readAsDataURL(f);
-};
+titleInput.addEventListener('input', (e)=>{ state.fields.title = e.target.value; renderPreview(); });
+subtitleInput.addEventListener('input', (e)=>{ state.fields.subtitle = e.target.value; renderPreview(); });
+dateInput.addEventListener('input', (e)=>{ state.fields.date = e.target.value; renderPreview(); });
+venueInput.addEventListener('input', (e)=>{ state.fields.venue = e.target.value; renderPreview(); });
+contactInput.addEventListener('input', (e)=>{ state.fields.contact = e.target.value; renderPreview(); });
 
-buyBtn.onclick=()=>{
-  const t=getTemplate();
-  if(confirm(`Pay KES ${t.price}? (Simulated)`)){
-    state.paid=true;
-    alert('Payment successful (simulated)');
-    buyBtn.textContent='Paid ✓';
+photoInput.addEventListener('change', (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{ state.photoDataUrl = ev.target.result; renderPreview(); };
+  reader.readAsDataURL(file);
+});
+
+buyBtn.addEventListener('click', ()=>{
+  const t = getTemplateById(state.selectedTemplateId);
+  const confirmed = confirm('Pay KES ' + t.price + ' to download this flier? (Simulated)');
+  if(!confirmed) return;
+  state.paid = true;
+  alert('Payment successful (simulated). You can now download the flier.');
+  buyBtn.textContent = 'Paid ✓';
+  buyBtn.style.background = '#10b981';
+});
+
+resetPaymentBtn.addEventListener('click', ()=>{
+  state.paid = false;
+  buyBtn.textContent = 'Buy (KES ' + getTemplateById(state.selectedTemplateId).price + ')';
+  buyBtn.style.background = '';
+});
+
+saveDraftBtn.addEventListener('click', ()=>{
+  const drafts = JSON.parse(localStorage.getItem('peron_drafts') || '[]');
+  drafts.push({ id: Date.now(), templateId: state.selectedTemplateId, fields: {...state.fields}, photoDataUrl: state.photoDataUrl });
+  localStorage.setItem('peron_drafts', JSON.stringify(drafts));
+  alert('Draft saved locally');
+});
+
+downloadBtn.addEventListener('click', async ()=>{
+  if(!state.paid){ alert('Please complete payment before downloading.'); return; }
+  const node = document.getElementById('flierPreview');
+  try{
+    const canvas = await html2canvas(node, { scale: 2, backgroundColor: null });
+    const dataUrl = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `${state.selectedTemplateId}-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch(err){
+    console.error(err);
+    alert('Download failed: ' + err.message);
   }
-};
+});
 
-resetBtn.onclick=()=>{state.paid=false;buyBtn.textContent='Buy (KES '+getTemplate().price+')';};
+downloadPDFBtn.addEventListener('click', async ()=>{
+  if(!state.paid){ alert('Please complete payment before downloading.'); return; }
+  const node = document.getElementById('flierPreview');
+  const canvas = await html2canvas(node, { scale: 2, backgroundColor: null });
+  const dataUrl = canvas.toDataURL('image/png');
+  const w = window.open('');
+  w.document.write('<img src="'+dataUrl+'" style="max-width:100%"/>');
+  w.document.close();
+});
 
-saveBtn.onclick=()=>{
-  const d=JSON.parse(localStorage.getItem('drafts')||'[]');
-  d.push({...state});
-  localStorage.setItem('drafts',JSON.stringify(d));
-  alert('Draft saved');
-};
-
-downloadBtn.onclick=async()=>{
-  if(!state.paid){alert('Please pay first');return;}
-  const canvas=await html2canvas(flier,{scale:2});
-  const a=document.createElement('a');
-  a.href=canvas.toDataURL('image/png');
-  a.download='flier.png';
-  a.click();
-};
-
-// --- INIT ---
-renderCategories();
-renderTemplates();
-renderTemplateSelect();
-renderPreview();
+// --- init ---
+function init(){
+  // if ?category=... provided, use it
+  const qCategory = queryStringCategory();
+  if(qCategory && Object.keys(CATEGORIES).includes(qCategory)){
+    state.selectedCategory = qCategory;
+  }
+  renderCategories();
+  renderTemplates();
+  renderTemplateSelect();
+  selectFirstInCategory();
+  renderPreview();
+}
+init();
