@@ -1,172 +1,210 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>PERON TIPS — All Events</title>
-<link rel="icon" href="data:," />
-<style>
-  :root{
-    --accent:#0b63d6;
-    --muted:#6b7280;
-    --card:#ffffff;
-    --bg:#fbfdff;
-    --radius:12px;
-  }
-  *{box-sizing:border-box}
-  body{font-family:Inter,system-ui,Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#071126;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1100px;margin:36px auto;padding:20px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  h1{margin:0;font-size:28px;color:var(--accent)}
-  p.lead{margin:6px 0 0;color:var(--muted)}
-  .controls{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
-  .search{flex:1;min-width:200px}
-  input.searchInput{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6eefb;background:white}
-  .btn{background:var(--accent);color:white;padding:10px 12px;border-radius:10px;text-decoration:none;display:inline-block}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
-  .card{background:var(--card);padding:14px;border-radius:var(--radius);border:1px solid #e9f0fb;box-shadow:0 8px 20px rgba(11,99,214,0.04)}
-  .card h3{margin:0 0 8px;font-size:16px;color:#073b8c}
-  .card ul{margin:0;padding-left:18px;color:var(--muted)}
-  .card a.eventBtn{display:inline-block;margin-top:10px;background:#eff7ff;color:var(--accent);padding:8px 10px;border-radius:8px;text-decoration:none;border:1px solid #dbefff}
-  footer{margin-top:26px;color:var(--muted);font-size:13px}
-  @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:640px){header{flex-direction:column;align-items:flex-start} .grid{grid-template-columns:1fr}}
-  .highlight{display:inline-block;background:linear-gradient(90deg,#eaf4ff,#fff);padding:6px 8px;border-radius:8px;border:1px solid #e7f0ff;color:var(--accent);font-weight:600}
-  /* added muted */
-  .muted { color: var(--muted); font-size: 13px; }
-  /* small accessibility focus */
-  a:focus, button:focus { outline: 3px solid rgba(11,99,214,0.18); outline-offset: 2px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Peron Tips</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #000;
+    }
+
+    header {
+      background-color: #2ecc71;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    header .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu-icon {
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    .dropdown {
+      display: none;
+      flex-direction: column;
+      background-color: #2ecc71;
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      min-width: 220px;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 1000;
+    }
+
+    .dropdown a {
+      color: white;
+      padding: 12px;
+      text-decoration: none;
+      border-bottom: 1px solid #27ae60;
+    }
+
+    .dropdown a:hover {
+      background-color: #27ae60;
+    }
+
+    .container {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      margin: 20px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background-color: #27ae60;
+    }
+
+    .note {
+      background-color: #111;
+      color: white;
+      padding: 20px;
+      margin: 30px auto;
+      border-radius: 8px;
+      max-width: 90%;
+    }
+
+    .note h3 {
+      color: gold;
+      margin-top: 0;
+    }
+
+    .orange-button {
+      background-color: orange;
+      color: black;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      header .logo {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>PERON TIPS</h1>
-        <p class="lead">Create event fliers quickly — choose an event type below, open the editor, replace text and upload a photo that shows through a round transparent region.</p>
-      </div>
-      <div style="text-align:right">
-        <div class="highlight">Easy • Fast • Mobile-friendly</div>
-        <div style="margin-top:8px"><a class="btn" href="creator.html" rel="noopener" aria-label="Open the flyer editor">Open Editor (choose event there)</a></div>
-      </div>
-    </header>
 
-    <div class="controls">
-      <div class="search" style="flex:1">
-        <input id="searchInput" class="searchInput" placeholder="Search events (e.g. 'baby', 'church', 'business')">
-      </div>
-      <div>
-        <a class="btn" href="creator.html?event=engagement" rel="noopener" aria-label="Quick open engagement template">Quick: Engagement</a>
-      </div>
-      <div>
-        <a class="btn" href="creator.html?event=baby-shower" rel="noopener" aria-label="Quick open baby shower template">Quick: Baby Shower</a>
-      </div>
-    </div>
+<!-- Header with dropdown menu -->
+<header>
+  <div class="logo">Peron Tips</div>
+  <div class="menu-icon" onclick="toggleDropdown()">☰</div>
+  <div class="dropdown" id="dropdown-menu">
+    <a href="index.html">Home</a>
+    <a href="high-school/high-school.html">High School Questions</a>
+    <a href="university/university.html">University Questions</a>
+    <a href="college/college.html">College Questions</a>
+    <a href="parents/parents.html">Parents</a>
+    <a href="illiterate/illiterate.html">Illiterate / Simple Knowledge</a>
+    <a href="professionals/professionals.html">Professionals / Working Class</a>
+    <a href="entrepreneurs/entrepreneurs.html">Entrepreneurs / Business Owners</a>
+    <a href="children/children.html">Children / Kids</a>
+    <a href="general/general.html">General Knowledge / Mixed</a>
+    <a href="tech/tech.html">Tech / Digital Skills</a>
+    <a href="health/health.html">Health & Lifestyle</a>
+    <!-- NEW links -->
+    <a href="bio.html">Founder Bio</a>
+    <a href="terms.html">Terms &amp; Conditions</a>
+  </div>
+</header>
 
-    <noscript>
-      <p style="color:var(--muted)">This page requires JavaScript to list events. Please enable JavaScript or open an event directly using <code>creator.html?event=engagement</code>.</p>
-    </noscript>
+<div class="container">
+  <h2>WELCOME TO:</h2>
+  <h1>PERON TIPS</h1>
 
-    <div id="cardsGrid" class="grid" aria-live="polite">
-      <!-- Cards are populated by script -->
-    </div>
-
-    <footer>
-      <small>Tip: Upload your PNG flyer overlays (with round transparent area) into <code>/flyers/</code> using filenames like <code>engagement-1.png</code> or <code>baby-shower-1.png</code>. Then click a specific event to open the editor preloaded for that event.</small>
-    </footer>
+  <!-- Auto-playing video with sound -->
+  <div class="video-wrapper">
+    <video id="introVideo" autoplay muted playsinline>
+      <source src="1749408547544.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
 
+  <p><strong>CHOOSE YOUR QUIZ FIELDS NOW</strong></p>
+  <a href="page.html" class="button">CHOOSE YOUR QUIZ NOW</a>
+  <a href="refer.html" class="button orange-button">Refer Friends &amp; Earn</a>
+  <!-- NEW button -->
+  <a href="terms.html" class="button">Terms &amp; Conditions</a>
+
+  <div class="note">
+    <h3>Score Higher Per Section!</h3>
+    <p>
+      Every time you pass a quiz section with a perfect score, you’ll receive congratulations. Real knowledge!
+    </p>
+    <a href="disclaimer.html" class="button orange-button">View Disclaimer</a>
+    <p style="font-size: 12px; margin-top: 10px;">*Rewards subject to availability. Terms and conditions apply.</p>
+  </div>
+</div>
+
+<!-- Script for dropdown and video -->
 <script>
-// EVENTS list — slug, title, and sample label (links go to creator.html?event=slug)
-const EVENTS = [
-  {slug:'engagement', title:'Engagement / Proposal Announcement'},
-  {slug:'baby-shower', title:'Baby Shower'},
-  {slug:'bridal-shower', title:'Bridal Shower'},
-  {slug:'anniversary', title:'Anniversary Celebration'},
-  {slug:'house-warming', title:'House Warming / Thanksgiving Party'},
-  {slug:'funeral', title:'Funeral / Memorial Service'},
-  {slug:'family-reunion', title:'Family Reunion'},
-
-  {slug:'revival-service', title:'Revival Service'},
-  {slug:'youth-conference', title:'Youth Conference'},
-  {slug:'womens-fellowship', title:"Women's Fellowship / Ladies' Meeting"},
-  {slug:'mens-fellowship', title:"Men's Fellowship"},
-  {slug:'choir-concert', title:'Choir Concert / Worship Night'},
-  {slug:'bible-study', title:'Bible Study / Prayer Meeting'},
-  {slug:'fundraising', title:'Fundraising / Thanksgiving Sunday'},
-
-  {slug:'academic-conference', title:'Academic Conference / Seminar'},
-  {slug:'parents-day', title:"Parents' Day / Prize-Giving Day"},
-  {slug:'talent-show', title:'Talent Show / Drama Festival'},
-  {slug:'alumni-reunion', title:'Alumni Reunion'},
-  {slug:'class-party', title:'Class / School Party'},
-
-  {slug:'business-opening', title:'Business Opening / Launch'},
-  {slug:'product-promotion', title:'Product Promotion'},
-  {slug:'sales-offer', title:'Sales / Discount Offer'},
-  {slug:'real-estate', title:'Real Estate / Land for Sale'},
-  {slug:'training', title:'Training / Workshop / Seminar'},
-  {slug:'job-vacancy', title:'Job Vacancy'},
-  {slug:'career-fair', title:'Career Fair'},
-  {slug:'corporate-event', title:'Corporate Event / Company Anniversary'},
-
-  {slug:'charity', title:'Charity Event / Fundraiser'},
-  {slug:'sports-tournament', title:'Sports Tournament / Match'},
-  {slug:'political-rally', title:'Political Rally / Campaign'},
-  {slug:'environmental-cleanup', title:'Environmental Cleanup / Community Service'},
-  {slug:'cultural-festival', title:'Cultural Festival'},
-
-  {slug:'music-concert', title:'Music Concert'},
-  {slug:'art-exhibition', title:'Art Exhibition'},
-  {slug:'movie-night', title:'Movie Night / Film Premiere'},
-  {slug:'fashion-show', title:'Fashion Show'},
-  {slug:'talent-competition', title:'Talent Competition'}
-];
-
-// Render cards
-const grid = document.getElementById('cardsGrid');
-function renderCards(list){
-  grid.innerHTML = '';
-  list.forEach(e=>{
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-      <h3>${escapeHtml(e.title)}</h3>
-      <ul>
-        <li><small class="muted">Create beautiful fliers for this event</small></li>
-      </ul>
-      <div style="margin-top:10px">
-        <a class="eventBtn" href="creator.html?event=${encodeURIComponent(e.slug)}">Open ${shortLabel(e.title)}</a>
-      </div>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function shortLabel(title){
-  if (title.length > 26) {
-    // return first two words to be clearer
-    return title.split(' ').slice(0,2).join(' ');
+  function toggleDropdown() {
+    var menu = document.getElementById("dropdown-menu");
+    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
   }
-  return title.split(' / ')[0];
-}
 
-// search
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', ()=>{
-  const q = searchInput.value.trim().toLowerCase();
-  if(!q) return renderCards(EVENTS);
-  const filt = EVENTS.filter(e => e.title.toLowerCase().includes(q) || e.slug.includes(q));
-  renderCards(filt.length ? filt : [{slug:'', title:'No results — try another search'}]);
-});
+  window.onclick = function(event) {
+    if (!event.target.matches('.menu-icon')) {
+      var dropdown = document.getElementById("dropdown-menu");
+      if (dropdown && dropdown.style.display === "flex") {
+        dropdown.style.display = "none";
+      }
+    }
+  }
 
-// initial render
-renderCards(EVENTS);
-
-// small escape helper
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+  // Attempt to unmute video after load (browser may block it)
+  window.addEventListener("load", function () {
+    const video = document.getElementById("introVideo");
+    video.muted = false;
+    video.play().catch(err => {
+      // Browser blocked autoplay with sound; fallback to muted autoplay
+      console.warn("Autoplay with sound failed. Browser policy may block it.");
+      video.muted = true;
+      video.play();
+    });
+  });
 </script>
+
 </body>
-</html>
+  </html>
