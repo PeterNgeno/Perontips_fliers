@@ -1,433 +1,577 @@
-‎<!doctype html>
-‎<html lang="en">
-‎<head>
-‎<meta charset="utf-8" />
-‎<meta name="viewport" content="width=device-width,initial-scale=1" />
-‎<title>PERON TIPS — Creator</title>
-‎<style>
-‎  :root{--accent:#0b63d6;--muted:#6b7280}
-‎  body{font-family:Inter,system-ui,Arial;margin:0;background:#f5f9ff;color:#071126}
-‎  .wrap{max-width:1100px;margin:18px auto;padding:16px}
-‎  header{display:flex;align-items:center;justify-content:space-between}
-‎  h2{color:var(--accent);margin:0}
-‎  .layout{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:14px}
-‎  .panel{background:white;padding:12px;border-radius:10px;border:1px solid #e6eefb}
-‎  .templates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-‎  input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eefb;margin-top:6px}
-‎  .small{font-size:13px;color:var(--muted)}
-‎  .stage{display:flex;align-items:center;justify-content:center;padding:12px}
-‎  canvas{background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(11,99,214,0.06)}
-‎  .toolbar{display:flex;gap:8px;margin-top:10px}
-‎  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
-‎  .mutedbtn{background:#eef4ff;color:var(--accent);padding:8px;border-radius:8px;border:1px solid #dbefff}
-‎  .muted-outline{background:transparent;border:1px solid #e6eefb;color:#071126;padding:8px;border-radius:8px;cursor:pointer}
-‎  /* modal */
-‎  .modal-back{position:fixed;inset:0;background:rgba(7,17,38,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
-‎  .modal{background:white;padding:18px;border-radius:10px;width:320px;box-shadow:0 12px 40px rgba(7,17,38,0.2)}
-‎  .flex{display:flex;gap:8px;align-items:center}
-‎  @media(max-width:980px){.layout{grid-template-columns:1fr}}
-‎</style>
-‎</head>
-‎<body>
-‎  <div class="wrap">
-‎    <header>
-‎      <div>
-‎        <h2 id="pageTitle">PERON TIPS — Creator</h2>
-‎        <div id="pageSubtitle" class="small">Loading templates...</div>
-‎      </div>
-‎      <div>
-‎        <a class="mutedbtn" href="index.html">← Back</a>
-‎      </div>
-‎    </header>
-‎
-‎    <div class="layout">
-‎      <aside class="panel">
-‎        <h3 style="margin-top:0">Templates</h3>
-‎        <div id="templates" class="templates"></div>
-‎
-‎        <h4 style="margin-top:12px">Upload Photo</h4>
-‎        <input type="file" id="photoInput" accept="image/*">
-‎        <div class="small">Tip: portrait photos work best for round windows.</div>
-‎
-‎        <h4 style="margin-top:12px">Text</h4>
-‎        <label>Headline</label>
-‎        <input id="headline" placeholder="Event title">
-‎        <label>Details</label>
-‎        <textarea id="details" rows="3" placeholder="Date • Time • Venue"></textarea>
-‎        <label>Text color</label>
-‎        <input id="textColor" type="color" value="#ffffff">
-‎
-‎        <h4 style="margin-top:12px">Mask (circle)</h4>
-‎        <label>Move X</label>
-‎        <input id="maskX" type="range" min="0" max="100" value="50">
-‎        <label>Move Y</label>
-‎        <input id="maskY" type="range" min="0" max="100" value="28">
-‎        <label>Diameter</label>
-‎        <input id="maskD" type="range" min="10" max="100" value="48">
-‎
-‎        <div class="toolbar">
-‎          <button id="payDownloadBtn" class="btn">Pay & Download</button>
-‎          <button id="downloadBtn" class="muted-outline">Download (free)</button>
-‎          <button id="resetBtn" class="mutedbtn">Reset</button>
-‎        </div>
-‎
-‎        <div style="margin-top:10px" class="small" id="statusHint"></div>
-‎      </aside>
-‎
-‎      <section>
-‎        <div class="panel" style="min-height:640px;display:flex;flex-direction:column">
-‎          <div class="stage" style="flex:1">
-‎            <canvas id="canvas" width="700" height="1000"></canvas>
-‎          </div>
-‎          <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
-‎            <div class="small">Preview — align the circular window to match the transparent area of your overlay.</div>
-‎          </div>
-‎        </div>
-‎      </section>
-‎    </div>
-‎  </div>
-‎
-‎  <!-- Payment modal -->
-‎  <div id="paymentModal" style="display:none" class="modal-back">
-‎    <div class="modal">
-‎      <h3 style="margin:0 0 8px">Confirm Payment</h3>
-‎      <div class="small" id="payForText"></div>
-‎      <div style="margin-top:12px">
-‎        <label>Phone number (07xxxxxxxx)</label>
-‎        <input id="payPhone" placeholder="07xxxxxxxx" />
-‎      </div>
-‎      <div style="margin-top:12px" class="flex">
-‎        <div style="flex:1">
-‎          <label>Amount (Ksh)</label>
-‎          <input id="payAmount" type="number" value="30" />
-‎        </div>
-‎      </div>
-‎
-‎      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
-‎        <button id="payCancel" class="mutedbtn">Cancel</button>
-‎        <button id="payConfirm" class="btn">Send STK Push</button>
-‎      </div>
-‎
-‎      <div style="margin-top:12px" class="small" id="payNotice"></div>
-‎    </div>
-‎  </div>
-‎
-‎<script>
-‎// ----------------- MPESA CONFIG - UPDATE THESE TO MATCH YOUR SERVER -----------------
-‎const MPESA_CONFIG = {
-‎  // Absolute endpoints on your Render backend
-‎  checkoutUrl: 'https://perontips-fliers-backend.onrender.com/api/mpesa/stk',
-‎  statusUrl:   'https://perontips-fliers-backend.onrender.com/api/mpesa/status'
-‎};
-‎// -----------------------------------------------------------------------------------
-‎
-‎/*
-‎ EVENTS map: slug -> { title, samples[], payBeforeDownload: bool, price (Ksh) }
-‎ You can set payBeforeDownload=true for any event you want to charge.
-‎*/
-‎const EVENTS = {
-‎  'engagement': { title:'Engagement / Proposal', samples:['flyers/engagement-1.png','flyers/engagement-2.png'], payBeforeDownload: true, price: 20 },
-‎  'baby-shower': { title:'Baby Shower', samples:['flyers/baby-shower-1.png','flyers/baby-shower-2.png'], payBeforeDownload: true, price: 20 },
-‎  // (all other events - set payBeforeDownload false by default)
-‎  'bridal-shower': { title:'Bridal Shower', samples:['flyers/bridal-shower-1.png'], payBeforeDownload:false },
-‎  'anniversary': { title:'Anniversary', samples:['flyers/anniversary-1.png'], payBeforeDownload:false },
-‎  'house-warming': { title:'House Warming', samples:['flyers/house-warming-1.png'], payBeforeDownload:false },
-‎  'funeral': { title:'Funeral / Memorial', samples:['flyers/funeral-1.png'], payBeforeDownload:false },
-‎  'family-reunion': { title:'Family Reunion', samples:['flyers/family-reunion-1.png'], payBeforeDownload:false }
-‎  // add the other events the same way...
-‎};
-‎
-‎// ----------------- Helpers -----------------
-‎function qs(name){ const params = new URLSearchParams(location.search); return params.get(name); }
-‎const slug = qs('event') || 'engagement';
-‎const meta = EVENTS[slug] || { title:'Custom Event', samples:[], payBeforeDownload:false, price:20 };
-‎
-‎document.getElementById('pageTitle').textContent = 'PERON TIPS — ' + meta.title;
-‎document.getElementById('pageSubtitle').textContent = 'Templates for ' + meta.title + '.';
-‎
-‎// DOM refs
-‎const templatesDiv = document.getElementById('templates');
-‎const canvas = document.getElementById('canvas');
-‎const ctx = canvas.getContext('2d');
-‎let overlayImg = new Image();
-‎let photoImg = new Image();
-‎let photoLoaded=false;
-‎let chosen=null;
-‎const mask = { x:50, y:28, d:48 };
-‎
-‎// payment modal refs
-‎const paymentModal = document.getElementById('paymentModal');
-‎const payForText = document.getElementById('payForText');
-‎const payPhone = document.getElementById('payPhone');
-‎const payAmount = document.getElementById('payAmount');
-‎const payConfirm = document.getElementById('payConfirm');
-‎const payCancel = document.getElementById('payCancel');
-‎const payNotice = document.getElementById('payNotice');
-‎
-‎const payDownloadBtn = document.getElementById('payDownloadBtn');
-‎const downloadBtn = document.getElementById('downloadBtn');
-‎const resetBtn = document.getElementById('resetBtn');
-‎const statusHint = document.getElementById('statusHint');
-‎
-‎// fill templates UI
-‎function buildTemplates(){
-‎  templatesDiv.innerHTML = '';
-‎  if(meta.samples.length === 0){
-‎    templatesDiv.innerHTML = '<div class="small">No sample templates provided for this event. Upload your overlays to /flyers/ named like '+slug+'-1.png.</div>';
-‎    return;
-‎  }
-‎  meta.samples.forEach(s => {
-‎    const d = document.createElement('div'); d.style.cursor='pointer';
-‎    const img = document.createElement('img'); img.className='thumb'; img.src = s; img.alt = s; img.style.height='86px'; img.style.borderRadius='6px'; img.style.objectFit='cover';
-‎    const lab = document.createElement('div'); lab.textContent = s.split('/').pop(); lab.style.fontSize='13px'; lab.style.marginTop='6px'; lab.style.color='#0b63d6';
-‎    d.appendChild(img); d.appendChild(lab);
-‎    d.onclick = () => selectTemplate(s);
-‎    templatesDiv.appendChild(d);
-‎  });
-‎}
-‎
-‎// choose template
-‎function selectTemplate(src){
-‎  chosen = src;
-‎  overlayImg = new Image(); overlayImg.crossOrigin='anonymous'; overlayImg.src = src;
-‎  overlayImg.onload = ()=>{ const maxW = 1000; const scale = Math.min(1, maxW/overlayImg.width); canvas.width = Math.round(overlayImg.width * scale); canvas.height = Math.round(overlayImg.height * scale); render(); };
-‎  overlayImg.onerror = ()=>{ alert('Could not load overlay: ' + src + '. Ensure the file exists and is accessible.'); };
-‎  updateButtonsState();
-‎}
-‎
-‎// photo upload
-‎document.getElementById('photoInput').addEventListener('change', e => {
-‎  const file = e.target.files[0]; if(!file) return;
-‎  const url = URL.createObjectURL(file);
-‎  photoImg = new Image(); photoImg.crossOrigin='anonymous'; photoImg.src = url;
-‎  photoImg.onload = ()=>{ photoLoaded = true; render(); URL.revokeObjectURL(url); };
-‎});
-‎
-‎// text inputs
-‎['headline','details','textColor','maskX','maskY','maskD'].forEach(id=>{
-‎  const el = document.getElementById(id);
-‎  if(el) el.addEventListener('input', () => {
-‎    mask.x = Number(document.getElementById('maskX').value);
-‎    mask.y = Number(document.getElementById('maskY').value);
-‎    mask.d = Number(document.getElementById('maskD').value);
-‎    render();
-‎  });
-‎});
-‎
-‎// render preview
-‎function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
-‎function render(){
-‎  clearCanvas();
-‎  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-‎
-‎  if(photoLoaded){
-‎    const dia = canvas.width * (mask.d/100);
-‎    const cx = canvas.width * (mask.x/100);
-‎    const cy = canvas.height * (mask.y/100);
-‎    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.clip();
-‎    const iw = photoImg.width, ih = photoImg.height;
-‎    const scale = Math.max(dia/iw, dia/ih);
-‎    const sw = iw * scale, sh = ih * scale;
-‎    ctx.drawImage(photoImg, cx - sw/2, cy - sh/2, sw, sh);
-‎    ctx.restore();
-‎    ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth = Math.max(2, canvas.width/200); ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.stroke();
-‎  }
-‎
-‎  const headline = document.getElementById('headline').value || meta.title;
-‎  const details = document.getElementById('details').value || 'Date • Time • Venue';
-‎  const textColor = document.getElementById('textColor').value || '#ffffff';
-‎
-‎  ctx.textAlign = 'center'; ctx.fillStyle = textColor;
-‎  ctx.font = `${Math.round(canvas.width/16)}px Inter, sans-serif`;
-‎  wrapText(ctx, headline, canvas.width/2, canvas.height*0.55, canvas.width*0.86, Math.round(canvas.width/14));
-‎  ctx.font = `${Math.round(canvas.width/32)}px Inter, sans-serif`;
-‎  wrapText(ctx, details, canvas.width/2, canvas.height*0.72, canvas.width*0.86, Math.round(canvas.width/28));
-‎
-‎  if(overlayImg && overlayImg.complete){ ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height); }
-‎  if(!overlayImg.complete){
-‎    ctx.beginPath();
-‎    const cx = canvas.width * (mask.x/100);
-‎    const cy = canvas.height * (mask.y/100);
-‎    const dia = canvas.width * (mask.d/100);
-‎    ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath();
-‎    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(11,99,214,0.25)'; ctx.stroke();
-‎  }
-‎}
-‎
-‎// small text wrapper
-‎function wrapText(context, text, x, y, maxWidth, lineHeight){
-‎  const words = text.split(' ');
-‎  let line = '';
-‎  for(let n=0;n<words.length;n++){
-‎    const testLine = line + words[n] + ' ';
-‎    if(context.measureText(testLine).width > maxWidth && n>0){
-‎      context.fillText(line, x, y);
-‎      line = words[n] + ' ';
-‎      y += lineHeight;
-‎    } else { line = testLine; }
-‎  }
-‎  context.fillText(line, x, y);
-‎}
-‎
-‎// ---------------- Payment flow ----------------
-‎
-‎// helper: check if user has valid VIP for this event
-‎function hasValidVip(){
-‎  try {
-‎    const raw = localStorage.getItem('peron_vip');
-‎    if(!raw) return false;
-‎    const obj = JSON.parse(raw);
-‎    // obj should be { phone, expiry, event }
-‎    if(!obj.expiry) return false;
-‎    return Date.now() < obj.expiry && obj.event === slug;
-‎  } catch(e){ return false; }
-‎}
-‎
-‎function saveVip(phone, expiresMs){
-‎  const obj = { phone, expiry: expiresMs, event: slug };
-‎  localStorage.setItem('peron_vip', JSON.stringify(obj));
-‎  updateButtonsState();
-‎}
-‎
-‎function updateButtonsState(){
-‎  // If event requires payment and user doesn't have vip -> hide free download and show payDownload
-‎  const requires = !!meta.payBeforeDownload;
-‎  if(requires && !hasValidVip()){
-‎    payDownloadBtn.style.display = 'inline-block';
-‎    downloadBtn.style.display = 'none';
-‎    statusHint.textContent = `This template requires payment of Ksh ${meta.price}.`;
-‎  } else {
-‎    payDownloadBtn.style.display = 'none';
-‎    downloadBtn.style.display = 'inline-block';
-‎    statusHint.textContent = hasValidVip() ? 'You have paid and may download.' : '';
-‎  }
-‎}
-‎
-‎// show payment modal
-‎payDownloadBtn.addEventListener('click', ()=>{
-‎  if(!chosen){ alert('Choose a template first.'); return; }
-‎  payForText.textContent = `Pay Ksh ${meta.price} to download this template (${meta.title}).`;
-‎  payAmount.value = meta.price || 20; // dynamic amount
-‎  paymentModal.style.display = 'flex';
-‎  payNotice.textContent = '';
-‎});
-‎
-‎// cancel payment modal
-‎payCancel.addEventListener('click', ()=>{ paymentModal.style.display = 'none'; });
-‎
-‎// confirm (start STK push)
-‎payConfirm.addEventListener('click', async ()=>{
-‎  const phoneVal = (payPhone.value || '').trim();
-‎  const amountVal = Number(payAmount.value) || meta.price || 20;
-‎
-‎  // normalize phone: accept 07XXXXXXXX or 2547XXXXXXXX
-‎  let phoneToSend = null;
-‎  if(/^07\d{8}$/.test(phoneVal)) {
-‎    phoneToSend = '254' + phoneVal.substring(1);
-‎  } else if(/^2547\d{8}$/.test(phoneVal)) {
-‎    phoneToSend = phoneVal;
-‎  } else {
-‎    payNotice.style.color = 'crimson'; payNotice.textContent = 'Enter a valid phone number (07xxxxxxxx or 2547xxxxxxxx).';
-‎    return;
-‎  }
-‎
-‎  payNotice.style.color = 'black'; payNotice.textContent = 'Sending STK push... please approve the prompt on your phone.';
-‎  payConfirm.disabled = true;
-‎  try {
-‎    const payload = { phone: phoneToSend, amount: amountVal, event: slug, template: chosen };
-‎    const res = await fetch(MPESA_CONFIG.checkoutUrl, {
-‎      method: 'POST',
-‎      headers: { 'Content-Type': 'application/json' },
-‎      body: JSON.stringify(payload)
-‎    });
-‎    if(!res.ok) throw new Error('Server error: ' + res.status);
-‎    const j = await res.json();
-‎    if(!j.checkoutId){
-‎      throw new Error('Invalid server response: missing checkoutId');
-‎    }
-‎    payNotice.textContent = 'STK push sent — waiting for confirmation...';
-‎    // poll status
-‎    await pollPaymentStatus(j.checkoutId, phoneToSend);
-‎  } catch(err){
-‎    console.error(err);
-‎    payNotice.style.color = 'crimson';
-‎    payNotice.textContent = 'Payment initiation failed: ' + (err.message || err);
-‎  } finally {
-‎    payConfirm.disabled = false;
-‎  }
-‎});
-‎
-‎// poll backend for payment status
-‎async function pollPaymentStatus(checkoutId, phone){
-‎  const timeoutMs = 120000; // 2 minutes
-‎  const intervalMs = 3000;
-‎  const start = Date.now();
-‎  while(true){
-‎    try {
-‎      const res = await fetch(MPESA_CONFIG.statusUrl + '?checkoutId=' + encodeURIComponent(checkoutId));
-‎      if(res.ok){
-‎        const j = await res.json();
-‎        const st = (j.status || '').toString().toLowerCase();
-‎        if(st === 'success' || st === 'ok' || st === 'completed'){
-‎          // if your backend returns expiry timestamp (ms) use that; otherwise set a default short expiry (e.g., 12 hours)
-‎          const expiry = j.expiry || (Date.now() + (1000 * 60 * 60 * 12));
-‎          saveVip(phone, expiry);
-‎          payNotice.style.color = 'green';
-‎          payNotice.textContent = 'Payment confirmed — downloading now!';
-‎          paymentModal.style.display = 'none';
-‎          // automatically trigger download
-‎          setTimeout(()=>generateAndDownload(), 600);
-‎          return;
-‎        } else if(st === 'failed' || st === 'error' || st === 'cancelled'){
-‎          payNotice.style.color = 'crimson';
-‎          payNotice.textContent = 'Payment failed or canceled. Please try again.';
-‎          return;
-‎        } // else pending -> continue
-‎      } else {
-‎        console.warn('Status poll HTTP', res.status);
-‎      }
-‎    } catch(e){
-‎      console.warn('poll error', e);
-‎    }
-‎    if(Date.now() - start > timeoutMs){
-‎      payNotice.style.color = 'crimson';
-‎      payNotice.textContent = 'Payment not confirmed within 2 minutes. Please check your phone or try again.';
-‎      return;
-‎    }
-‎    await new Promise(r=>setTimeout(r, intervalMs));
-‎  }
-‎}
-‎
-‎// download (free) - allowed only if event not gated or vip valid
-‎downloadBtn.addEventListener('click', ()=>{
-‎  if(meta.payBeforeDownload && !hasValidVip()){
-‎    alert('This template requires payment before downloading. Press Pay & Download to pay via M-Pesa.');
-‎    return;
-‎  }
-‎  generateAndDownload();
-‎});
-‎
-‎// generate PNG from canvas and download
-‎function generateAndDownload(){
-‎  render();
-‎  canvas.toBlob(blob=>{
-‎    const a = document.createElement('a');
-‎    a.href = URL.createObjectURL(blob);
-‎    const base = slug + '-' + (chosen? chosen.split('/').pop().replace(/\.[^.]+$/,'') : 'custom');
-‎    a.download = base + '.png';
-‎    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
-‎  }, 'image/png');
-‎}
-‎
-‎// reset
-‎resetBtn.addEventListener('click', ()=>{ document.getElementById('headline').value=''; document.getElementById('details').value=''; document.getElementById('textColor').value='#ffffff'; document.getElementById('maskX').value=50; document.getElementById('maskY').value=28; document.getElementById('maskD').value=48; mask.x=50; mask.y=28; mask.d=48; render(); });
-‎
-‎// init
-‎buildTemplates();
-‎render();
-‎updateButtonsState();
-‎
-‎</script>
-‎</body>
-‎</html>
-‎
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PERON TIPS — Creator</title>
+<style>
+  :root{--accent:#0b63d6;--muted:#6b7280}
+  body{font-family:Inter,system-ui,Arial;margin:0;background:#f5f9ff;color:#071126}
+  .wrap{max-width:1100px;margin:18px auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between}
+  h2{color:var(--accent);margin:0}
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:14px}
+  .panel{background:white;padding:12px;border-radius:10px;border:1px solid #e6eefb}
+  .templates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eefb;margin-top:6px}
+  .small{font-size:13px;color:var(--muted)}
+  .stage{display:flex;align-items:center;justify-content:center;padding:12px}
+  canvas{background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(11,99,214,0.06)}
+  .toolbar{display:flex;gap:8px;margin-top:10px}
+  .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
+  .mutedbtn{background:#eef4ff;color:var(--accent);padding:8px;border-radius:8px;border:1px solid #dbefff}
+  .muted-outline{background:transparent;border:1px solid #e6eefb;color:#071126;padding:8px;border-radius:8px;cursor:pointer}
+  /* modal */
+  .modal-back{position:fixed;inset:0;background:rgba(7,17,38,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
+  .modal{background:white;padding:18px;border-radius:10px;width:320px;box-shadow:0 12px 40px rgba(7,17,38,0.2)}
+  .flex{display:flex;gap:8px;align-items:center}
+  #bgList div{transition:all .12s ease}
+  #bgList div:hover{transform:scale(1.04)}
+  @media(max-width:980px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h2 id="pageTitle">PERON TIPS — Creator</h2>
+        <div id="pageSubtitle" class="small">Loading templates...</div>
+      </div>
+      <div>
+        <a class="mutedbtn" href="index.html">← Back</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="panel">
+        <h3 style="margin-top:0">Templates</h3>
+        <div id="templates" class="templates"></div>
+
+        <h4 style="margin-top:12px">Upload Photo</h4>
+        <input type="file" id="photoInput" accept="image/*">
+        <div class="small">Tip: portrait photos work best for round windows.</div>
+
+        <h4 style="margin-top:12px">Photo Position & Zoom</h4>
+        <label style="display:block;margin-top:6px">Zoom</label>
+        <input id="photoZoom" type="range" min="50" max="200" value="100" style="width:100%">
+        <div class="small" style="margin-top:8px">Drag the photo inside the circle on the canvas to reposition. Use zoom to scale.</div>
+
+        <h4 style="margin-top:12px">Backgrounds (choose one)</h4>
+        <div id="bgList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+        <div class="small" style="margin-top:8px">Replace placeholder URLs in the code with your own background image links.</div>
+
+        <h4 style="margin-top:12px">Text</h4>
+        <label>Headline</label>
+        <input id="headline" placeholder="Event title">
+        <label>Details</label>
+        <textarea id="details" rows="3" placeholder="Date • Time • Venue"></textarea>
+        <label>Text color</label>
+        <input id="textColor" type="color" value="#ffffff">
+
+        <h4 style="margin-top:12px">Mask (circle)</h4>
+        <label>Move X</label>
+        <input id="maskX" type="range" min="0" max="100" value="50">
+        <label>Move Y</label>
+        <input id="maskY" type="range" min="0" max="100" value="28">
+        <label>Diameter</label>
+        <input id="maskD" type="range" min="10" max="100" value="48">
+
+        <div class="toolbar">
+          <button id="payDownloadBtn" class="btn">Pay & Download</button>
+          <button id="downloadBtn" class="muted-outline">Download (free)</button>
+          <button id="resetBtn" class="mutedbtn">Reset</button>
+        </div>
+
+        <div style="margin-top:10px" class="small" id="statusHint"></div>
+      </aside>
+
+      <section>
+        <div class="panel" style="min-height:640px;display:flex;flex-direction:column">
+          <div class="stage" style="flex:1">
+            <canvas id="canvas" width="700" height="1000"></canvas>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+            <div class="small">Preview — align the circular window to match the transparent area of your overlay.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Payment modal -->
+  <div id="paymentModal" style="display:none" class="modal-back">
+    <div class="modal">
+      <h3 style="margin:0 0 8px">Confirm Payment</h3>
+      <div class="small" id="payForText"></div>
+      <div style="margin-top:12px">
+        <label>Phone number (07xxxxxxxx)</label>
+        <input id="payPhone" placeholder="07xxxxxxxx" />
+      </div>
+      <div style="margin-top:12px" class="flex">
+        <div style="flex:1">
+          <label>Amount (Ksh)</label>
+          <input id="payAmount" type="number" value="30" />
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+        <button id="payCancel" class="mutedbtn">Cancel</button>
+        <button id="payConfirm" class="btn">Send STK Push</button>
+      </div>
+
+      <div style="margin-top:12px" class="small" id="payNotice"></div>
+    </div>
+  </div>
+
+<script>
+// ----------------- MPESA CONFIG - UPDATE THESE TO MATCH YOUR SERVER -----------------
+const MPESA_CONFIG = {
+  // Absolute endpoints on your Render backend
+  checkoutUrl: 'https://perontips-fliers-backend.onrender.com/api/mpesa/stk',
+  statusUrl:   'https://perontips-fliers-backend.onrender.com/api/mpesa/status'
+};
+// -----------------------------------------------------------------------------------
+
+/*
+ EVENTS map: slug -> { title, samples[], payBeforeDownload: bool, price (Ksh) }
+ You can set payBeforeDownload=true for any event you want to charge.
+*/
+const EVENTS = {
+  'engagement': { title:'Engagement / Proposal', samples:['flyers/engagement-1.png','flyers/engagement-2.png'], payBeforeDownload: true, price: 20 },
+  'baby-shower': { title:'Baby Shower', samples:['flyers/baby-shower-1.png','flyers/baby-shower-2.png'], payBeforeDownload: true, price: 20 },
+  'bridal-shower': { title:'Bridal Shower', samples:['flyers/bridal-shower-1.png'], payBeforeDownload:false },
+  'anniversary': { title:'Anniversary', samples:['flyers/anniversary-1.png'], payBeforeDownload:false },
+  'house-warming': { title:'House Warming', samples:['flyers/house-warming-1.png'], payBeforeDownload:false },
+  'funeral': { title:'Funeral / Memorial', samples:['flyers/funeral-1.png'], payBeforeDownload:false },
+  'family-reunion': { title:'Family Reunion', samples:['flyers/family-reunion-1.png'], payBeforeDownload:false }
+};
+
+// ----------------- Helpers -----------------
+function qs(name){ const params = new URLSearchParams(location.search); return params.get(name); }
+const slug = qs('event') || 'engagement';
+const meta = EVENTS[slug] || { title:'Custom Event', samples:[], payBeforeDownload:false, price:20 };
+
+document.getElementById('pageTitle').textContent = 'PERON TIPS — ' + meta.title;
+document.getElementById('pageSubtitle').textContent = 'Templates for ' + meta.title + '.';
+
+// DOM refs
+const templatesDiv = document.getElementById('templates');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let overlayImg = new Image();
+let photoImg = new Image();
+let photoLoaded = false;
+let chosen = null;
+const mask = { x:50, y:28, d:48 };
+
+// NEW: photo transform state (draggable + zoom)
+let photoPos = { x: 0, y: 0 };
+let photoScale = 1;
+let isDragging = false;
+let lastPointer = { x: 0, y: 0 };
+
+// NEW: background image
+let bgImg = null;
+const BACKGROUNDS = [
+  // Replace these placeholder URLs with your actual background image links
+  'https://via.placeholder.com/1200x1800/ffffff/cccccc?text=BG1',
+  'https://via.placeholder.com/1200x1800/eee8f5/cccccc?text=BG2',
+  'https://via.placeholder.com/1200x1800/f5f5e6/cccccc?text=BG3',
+  'https://via.placeholder.com/1200x1800/e8f5f0/cccccc?text=BG4',
+  'https://via.placeholder.com/1200x1800/f0f0f8/cccccc?text=BG5',
+  'https://via.placeholder.com/1200x1800/ffe8e8/cccccc?text=BG6',
+  'https://via.placeholder.com/1200x1800/e8ffe8/cccccc?text=BG7',
+  'https://via.placeholder.com/1200x1800/e8eef5/cccccc?text=BG8',
+  'https://via.placeholder.com/1200x1800/f8efe8/cccccc?text=BG9',
+  'https://via.placeholder.com/1200x1800/eef8ff/cccccc?text=BG10'
+];
+
+// payment modal refs
+const paymentModal = document.getElementById('paymentModal');
+const payForText = document.getElementById('payForText');
+const payPhone = document.getElementById('payPhone');
+const payAmount = document.getElementById('payAmount');
+const payConfirm = document.getElementById('payConfirm');
+const payCancel = document.getElementById('payCancel');
+const payNotice = document.getElementById('payNotice');
+
+const payDownloadBtn = document.getElementById('payDownloadBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn = document.getElementById('resetBtn');
+const statusHint = document.getElementById('statusHint');
+
+// fill templates UI
+function buildTemplates(){
+  templatesDiv.innerHTML = '';
+  if(meta.samples.length === 0){
+    templatesDiv.innerHTML = '<div class="small">No sample templates provided for this event. Upload your overlays to /flyers/ named like '+slug+'-1.png.</div>';
+    return;
+  }
+  meta.samples.forEach(s => {
+    const d = document.createElement('div'); d.style.cursor='pointer';
+    const img = document.createElement('img'); img.className='thumb'; img.src = s; img.alt = s; img.style.height='86px'; img.style.borderRadius='6px'; img.style.objectFit='cover';
+    const lab = document.createElement('div'); lab.textContent = s.split('/').pop(); lab.style.fontSize='13px'; lab.style.marginTop='6px'; lab.style.color='#0b63d6';
+    d.appendChild(img); d.appendChild(lab);
+    d.onclick = () => selectTemplate(s);
+    templatesDiv.appendChild(d);
+  });
+}
+
+// choose template
+function selectTemplate(src){
+  chosen = src;
+  overlayImg = new Image(); overlayImg.crossOrigin='anonymous'; overlayImg.src = src;
+  overlayImg.onload = ()=>{ const maxW = 1000; const scale = Math.min(1, maxW/overlayImg.width); canvas.width = Math.round(overlayImg.width * scale); canvas.height = Math.round(overlayImg.height * scale);
+    // reset photo transform so overlay change centers photo
+    photoPos.x = 0; photoPos.y = 0; photoScale = 1; document.getElementById('photoZoom').value = 100;
+    render(); };
+  overlayImg.onerror = ()=>{ alert('Could not load overlay: ' + src + '. Ensure the file exists and is accessible.'); };
+  updateButtonsState();
+}
+
+// photo upload
+document.getElementById('photoInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if(!file) return;
+  const url = URL.createObjectURL(file);
+  photoImg = new Image(); photoImg.crossOrigin='anonymous'; photoImg.src = url;
+  // reset transform so new photo starts centered
+  photoPos.x = 0; photoPos.y = 0; photoScale = 1; document.getElementById('photoZoom').value = 100;
+  photoImg.onload = ()=>{ photoLoaded = true; render(); URL.revokeObjectURL(url); };
+});
+
+// photo zoom slider
+const photoZoomEl = document.getElementById('photoZoom');
+if (photoZoomEl) {
+  photoZoomEl.addEventListener('input', () => {
+    photoScale = (Number(photoZoomEl.value) || 100) / 100;
+    render();
+  });
+}
+
+// pointer (mouse / touch) dragging for photo reposition
+canvas.style.touchAction = 'none'; // prevent touch scrolling while dragging
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (!photoLoaded) return;
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const py = e.clientY - rect.top;
+  const cx = canvas.width * (mask.x / 100);
+  const cy = canvas.height * (mask.y / 100);
+  const dia = canvas.width * (mask.d / 100);
+  const dist = Math.hypot(px - cx, py - cy);
+  if (dist <= dia/2 + 10) {
+    isDragging = true;
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+    try { canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId); } catch(_) {}
+  }
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastPointer.x;
+  const dy = e.clientY - lastPointer.y;
+  lastPointer.x = e.clientX;
+  lastPointer.y = e.clientY;
+  photoPos.x += dx;
+  photoPos.y += dy;
+  render();
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+  try { canvas.releasePointerCapture && canvas.releasePointerCapture(e.pointerId); } catch(_) {}
+});
+
+canvas.addEventListener('pointercancel', () => { isDragging = false; });
+
+// text inputs and mask controls
+['headline','details','textColor','maskX','maskY','maskD'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', () => {
+    mask.x = Number(document.getElementById('maskX').value);
+    mask.y = Number(document.getElementById('maskY').value);
+    mask.d = Number(document.getElementById('maskD').value);
+    render();
+  });
+});
+
+// render preview
+function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
+function render(){
+  clearCanvas();
+  // draw background (if any)
+  if(bgImg && bgImg.complete){
+    // draw background to fill canvas while preserving aspect (cover)
+    const bw = bgImg.width || 1, bh = bgImg.height || 1;
+    const scale = Math.max(canvas.width / bw, canvas.height / bh);
+    const dw = bw * scale, dh = bh * scale;
+    const dx = (canvas.width - dw) / 2; const dy = (canvas.height - dh) / 2;
+    ctx.drawImage(bgImg, dx, dy, dw, dh);
+  } else {
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+
+  if(photoLoaded){
+    const dia = canvas.width * (mask.d/100);
+    const cx = canvas.width * (mask.x/100);
+    const cy = canvas.height * (mask.y/100);
+
+    // compute base scale to cover the circle
+    const iw = photoImg.width || 1, ih = photoImg.height || 1;
+    const baseScale = Math.max(dia/iw, dia/ih);
+    const usedScale = baseScale * (photoScale || 1);
+
+    const sw = iw * usedScale;
+    const sh = ih * usedScale;
+
+    // center position adjusted by user offset (photoPos is in pixels)
+    const drawX = cx - sw/2 + (photoPos.x || 0);
+    const drawY = cy - sh/2 + (photoPos.y || 0);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx,cy,dia/2,0,Math.PI*2);
+    ctx.closePath();
+    ctx.clip();
+
+    ctx.drawImage(photoImg, drawX, drawY, sw, sh);
+    ctx.restore();
+
+    // draw subtle ring
+    ctx.beginPath();
+    ctx.arc(cx,cy,dia/2,0,Math.PI*2);
+    ctx.closePath();
+    ctx.lineWidth = Math.max(2, canvas.width/200);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.stroke();
+  }
+
+  const headline = document.getElementById('headline').value || meta.title;
+  const details = document.getElementById('details').value || 'Date • Time • Venue';
+  const textColor = document.getElementById('textColor').value || '#ffffff';
+
+  ctx.textAlign = 'center'; ctx.fillStyle = textColor;
+  ctx.font = `${Math.round(canvas.width/16)}px Inter, sans-serif`;
+  wrapText(ctx, headline, canvas.width/2, canvas.height*0.55, canvas.width*0.86, Math.round(canvas.width/14));
+  ctx.font = `${Math.round(canvas.width/32)}px Inter, sans-serif`;
+  wrapText(ctx, details, canvas.width/2, canvas.height*0.72, canvas.width*0.86, Math.round(canvas.width/28));
+
+  if(overlayImg && overlayImg.complete){ ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height); }
+  if(!overlayImg.complete){
+    ctx.beginPath();
+    const cx = canvas.width * (mask.x/100);
+    const cy = canvas.height * (mask.y/100);
+    const dia = canvas.width * (mask.d/100);
+    ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(11,99,214,0.25)'; ctx.stroke();
+  }
+}
+
+// small text wrapper
+function wrapText(context, text, x, y, maxWidth, lineHeight){
+  const words = (text||'').split(' ');
+  let line = '';
+  for(let n=0;n<words.length;n++){
+    const testLine = line + words[n] + ' ';
+    if(context.measureText(testLine).width > maxWidth && n>0){
+      context.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else { line = testLine; }
+  }
+  context.fillText(line, x, y);
+}
+
+// Background gallery
+function buildBackgroundGallery(){
+  const list = document.getElementById('bgList');
+  if(!list) return;
+  list.innerHTML = '';
+  BACKGROUNDS.forEach((url, idx) => {
+    const box = document.createElement('div');
+    box.style.width = '72px'; box.style.height = '72px'; box.style.borderRadius = '6px'; box.style.overflow = 'hidden'; box.style.cursor = 'pointer'; box.style.border = '2px solid transparent'; box.title = 'Background ' + (idx + 1);
+
+    const img = document.createElement('img');
+    img.src = url; img.alt = 'bg' + (idx + 1);
+    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+    box.appendChild(img);
+
+    box.addEventListener('click', () => {
+      Array.from(list.children).forEach(c => c.style.border = '2px solid transparent');
+      box.style.border = '2px solid #0b63d6';
+      bgImg = new Image(); bgImg.crossOrigin = 'anonymous'; bgImg.src = url; bgImg.onload = () => render();
+    });
+
+    list.appendChild(box);
+  });
+}
+
+// ---------------- Payment flow ----------------
+
+// helper: check if user has valid VIP for this event
+function hasValidVip(){
+  try {
+    const raw = localStorage.getItem('peron_vip');
+    if(!raw) return false;
+    const obj = JSON.parse(raw);
+    if(!obj.expiry) return false;
+    return Date.now() < obj.expiry && obj.event === slug;
+  } catch(e){ return false; }
+}
+
+function saveVip(phone, expiresMs){
+  const obj = { phone, expiry: expiresMs, event: slug };
+  localStorage.setItem('peron_vip', JSON.stringify(obj));
+  updateButtonsState();
+}
+
+function updateButtonsState(){
+  const requires = !!meta.payBeforeDownload;
+  if(requires && !hasValidVip()){
+    payDownloadBtn.style.display = 'inline-block';
+    downloadBtn.style.display = 'none';
+    statusHint.textContent = `This template requires payment of Ksh ${meta.price}.`;
+  } else {
+    payDownloadBtn.style.display = 'none';
+    downloadBtn.style.display = 'inline-block';
+    statusHint.textContent = hasValidVip() ? 'You have paid and may download.' : '';
+  }
+}
+
+// show payment modal
+payDownloadBtn.addEventListener('click', ()=>{
+  if(!chosen){ alert('Choose a template first.'); return; }
+  payForText.textContent = `Pay Ksh ${meta.price} to download this template (${meta.title}).`;
+  payAmount.value = meta.price || 20;
+  paymentModal.style.display = 'flex';
+  payNotice.textContent = '';
+});
+
+// cancel payment modal
+payCancel.addEventListener('click', ()=>{ paymentModal.style.display = 'none'; });
+
+// confirm (start STK push)
+payConfirm.addEventListener('click', async ()=>{
+  const phoneVal = (payPhone.value || '').trim();
+  const amountVal = Number(payAmount.value) || meta.price || 20;
+  let phoneToSend = null;
+  if(/^07\d{8}$/.test(phoneVal)) {
+    phoneToSend = '254' + phoneVal.substring(1);
+  } else if(/^2547\d{8}$/.test(phoneVal)) {
+    phoneToSend = phoneVal;
+  } else {
+    payNotice.style.color = 'crimson'; payNotice.textContent = 'Enter a valid phone number (07xxxxxxxx or 2547xxxxxxxx).';
+    return;
+  }
+
+  payNotice.style.color = 'black'; payNotice.textContent = 'Sending STK push... please approve the prompt on your phone.';
+  payConfirm.disabled = true;
+  try {
+    const payload = { phone: phoneToSend, amount: amountVal, event: slug, template: chosen };
+    const res = await fetch(MPESA_CONFIG.checkoutUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Server error: ' + res.status);
+    const j = await res.json();
+    if(!j.checkoutId){
+      throw new Error('Invalid server response: missing checkoutId');
+    }
+    payNotice.textContent = 'STK push sent — waiting for confirmation...';
+    await pollPaymentStatus(j.checkoutId, phoneToSend);
+  } catch(err){
+    console.error(err);
+    payNotice.style.color = 'crimson';
+    payNotice.textContent = 'Payment initiation failed: ' + (err.message || err);
+  } finally {
+    payConfirm.disabled = false;
+  }
+});
+
+// poll backend for payment status
+async function pollPaymentStatus(checkoutId, phone){
+  const timeoutMs = 120000; // 2 minutes
+  const intervalMs = 3000;
+  const start = Date.now();
+  while(true){
+    try {
+      const res = await fetch(MPESA_CONFIG.statusUrl + '?checkoutId=' + encodeURIComponent(checkoutId));
+      if(res.ok){
+        const j = await res.json();
+        const st = (j.status || '').toString().toLowerCase();
+        if(st === 'success' || st === 'ok' || st === 'completed'){
+          const expiry = j.expiry || (Date.now() + (1000 * 60 * 60 * 12));
+          saveVip(phone, expiry);
+          payNotice.style.color = 'green';
+          payNotice.textContent = 'Payment confirmed — downloading now!';
+          paymentModal.style.display = 'none';
+          setTimeout(()=>generateAndDownload(), 600);
+          return;
+        } else if(st === 'failed' || st === 'error' || st === 'cancelled'){
+          payNotice.style.color = 'crimson';
+          payNotice.textContent = 'Payment failed or canceled. Please try again.';
+          return;
+        }
+      } else {
+        console.warn('Status poll HTTP', res.status);
+      }
+    } catch(e){
+      console.warn('poll error', e);
+    }
+    if(Date.now() - start > timeoutMs){
+      payNotice.style.color = 'crimson';
+      payNotice.textContent = 'Payment not confirmed within 2 minutes. Please check your phone or try again.';
+      return;
+    }
+    await new Promise(r=>setTimeout(r, intervalMs));
+  }
+}
+
+// download (free) - allowed only if event not gated or vip valid
+downloadBtn.addEventListener('click', ()=>{
+  if(meta.payBeforeDownload && !hasValidVip()){
+    alert('This template requires payment before downloading. Press Pay & Download to pay via M-Pesa.');
+    return;
+  }
+  generateAndDownload();
+});
+
+// generate PNG from canvas and download
+function generateAndDownload(){
+  render();
+  canvas.toBlob(blob=>{
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const base = slug + '-' + (chosen? chosen.split('/').pop().replace(/\.[^.]+$/,'') : 'custom');
+    a.download = base + '.png';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  }, 'image/png');
+}
+
+// reset
+resetBtn.addEventListener('click', ()=>{
+  document.getElementById('headline').value='';
+  document.getElementById('details').value='';
+  document.getElementById('textColor').value='#ffffff';
+  document.getElementById('maskX').value=50;
+  document.getElementById('maskY').value=28;
+  document.getElementById('maskD').value=48;
+  mask.x=50; mask.y=28; mask.d=48;
+  photoPos.x=0; photoPos.y=0; photoScale=1; document.getElementById('photoZoom').value=100;
+  bgImg = null; buildBackgroundGallery();
+  render();
+});
+
+// init
+buildTemplates();
+buildBackgroundGallery();
+render();
+updateButtonsState();
+
+</script>
+</body>
+  </html>
