@@ -25,6 +25,8 @@
   .modal-back{position:fixed;inset:0;background:rgba(7,17,38,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
   .modal{background:white;padding:18px;border-radius:10px;width:320px;box-shadow:0 12px 40px rgba(7,17,38,0.2)}
   .flex{display:flex;gap:8px;align-items:center}
+  #bgList div{transition:all .12s ease}
+  #bgList div:hover{transform:scale(1.04)}
   @media(max-width:980px){.layout{grid-template-columns:1fr}}
 </style>
 </head>
@@ -48,6 +50,15 @@
         <h4 style="margin-top:12px">Upload Photo</h4>
         <input type="file" id="photoInput" accept="image/*">
         <div class="small">Tip: portrait photos work best for round windows.</div>
+
+        <h4 style="margin-top:12px">Photo Position & Zoom</h4>
+        <label style="display:block;margin-top:6px">Zoom</label>
+        <input id="photoZoom" type="range" min="50" max="200" value="100" style="width:100%">
+        <div class="small" style="margin-top:8px">Drag the photo inside the circle on the canvas to reposition. Use zoom to scale.</div>
+
+        <h4 style="margin-top:12px">Backgrounds (choose one)</h4>
+        <div id="bgList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"></div>
+        <div class="small" style="margin-top:8px">Replace placeholder URLs in the code with your own background image links.</div>
 
         <h4 style="margin-top:12px">Text</h4>
         <label>Headline</label>
@@ -128,13 +139,11 @@ const MPESA_CONFIG = {
 const EVENTS = {
   'engagement': { title:'Engagement / Proposal', samples:['flyers/engagement-1.png','flyers/engagement-2.png'], payBeforeDownload: true, price: 20 },
   'baby-shower': { title:'Baby Shower', samples:['flyers/baby-shower-1.png','flyers/baby-shower-2.png'], payBeforeDownload: true, price: 20 },
-  // (all other events - set payBeforeDownload false by default)
   'bridal-shower': { title:'Bridal Shower', samples:['flyers/bridal-shower-1.png'], payBeforeDownload:false },
   'anniversary': { title:'Anniversary', samples:['flyers/anniversary-1.png'], payBeforeDownload:false },
   'house-warming': { title:'House Warming', samples:['flyers/house-warming-1.png'], payBeforeDownload:false },
   'funeral': { title:'Funeral / Memorial', samples:['flyers/funeral-1.png'], payBeforeDownload:false },
   'family-reunion': { title:'Family Reunion', samples:['flyers/family-reunion-1.png'], payBeforeDownload:false }
-  // add the other events the same way...
 };
 
 // ----------------- Helpers -----------------
@@ -151,9 +160,31 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let overlayImg = new Image();
 let photoImg = new Image();
-let photoLoaded=false;
-let chosen=null;
+let photoLoaded = false;
+let chosen = null;
 const mask = { x:50, y:28, d:48 };
+
+// NEW: photo transform state (draggable + zoom)
+let photoPos = { x: 0, y: 0 };
+let photoScale = 1;
+let isDragging = false;
+let lastPointer = { x: 0, y: 0 };
+
+// NEW: background image
+let bgImg = null;
+const BACKGROUNDS = [
+  // Replace these placeholder URLs with your actual background image links
+  'https://via.placeholder.com/1200x1800/ffffff/cccccc?text=BG1',
+  'https://via.placeholder.com/1200x1800/eee8f5/cccccc?text=BG2',
+  'https://via.placeholder.com/1200x1800/f5f5e6/cccccc?text=BG3',
+  'https://via.placeholder.com/1200x1800/e8f5f0/cccccc?text=BG4',
+  'https://via.placeholder.com/1200x1800/f0f0f8/cccccc?text=BG5',
+  'https://via.placeholder.com/1200x1800/ffe8e8/cccccc?text=BG6',
+  'https://via.placeholder.com/1200x1800/e8ffe8/cccccc?text=BG7',
+  'https://via.placeholder.com/1200x1800/e8eef5/cccccc?text=BG8',
+  'https://via.placeholder.com/1200x1800/f8efe8/cccccc?text=BG9',
+  'https://via.placeholder.com/1200x1800/eef8ff/cccccc?text=BG10'
+];
 
 // payment modal refs
 const paymentModal = document.getElementById('paymentModal');
@@ -190,7 +221,10 @@ function buildTemplates(){
 function selectTemplate(src){
   chosen = src;
   overlayImg = new Image(); overlayImg.crossOrigin='anonymous'; overlayImg.src = src;
-  overlayImg.onload = ()=>{ const maxW = 1000; const scale = Math.min(1, maxW/overlayImg.width); canvas.width = Math.round(overlayImg.width * scale); canvas.height = Math.round(overlayImg.height * scale); render(); };
+  overlayImg.onload = ()=>{ const maxW = 1000; const scale = Math.min(1, maxW/overlayImg.width); canvas.width = Math.round(overlayImg.width * scale); canvas.height = Math.round(overlayImg.height * scale);
+    // reset photo transform so overlay change centers photo
+    photoPos.x = 0; photoPos.y = 0; photoScale = 1; document.getElementById('photoZoom').value = 100;
+    render(); };
   overlayImg.onerror = ()=>{ alert('Could not load overlay: ' + src + '. Ensure the file exists and is accessible.'); };
   updateButtonsState();
 }
@@ -200,10 +234,60 @@ document.getElementById('photoInput').addEventListener('change', e => {
   const file = e.target.files[0]; if(!file) return;
   const url = URL.createObjectURL(file);
   photoImg = new Image(); photoImg.crossOrigin='anonymous'; photoImg.src = url;
+  // reset transform so new photo starts centered
+  photoPos.x = 0; photoPos.y = 0; photoScale = 1; document.getElementById('photoZoom').value = 100;
   photoImg.onload = ()=>{ photoLoaded = true; render(); URL.revokeObjectURL(url); };
 });
 
-// text inputs
+// photo zoom slider
+const photoZoomEl = document.getElementById('photoZoom');
+if (photoZoomEl) {
+  photoZoomEl.addEventListener('input', () => {
+    photoScale = (Number(photoZoomEl.value) || 100) / 100;
+    render();
+  });
+}
+
+// pointer (mouse / touch) dragging for photo reposition
+canvas.style.touchAction = 'none'; // prevent touch scrolling while dragging
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (!photoLoaded) return;
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const py = e.clientY - rect.top;
+  const cx = canvas.width * (mask.x / 100);
+  const cy = canvas.height * (mask.y / 100);
+  const dia = canvas.width * (mask.d / 100);
+  const dist = Math.hypot(px - cx, py - cy);
+  if (dist <= dia/2 + 10) {
+    isDragging = true;
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+    try { canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId); } catch(_) {}
+  }
+});
+
+canvas.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastPointer.x;
+  const dy = e.clientY - lastPointer.y;
+  lastPointer.x = e.clientX;
+  lastPointer.y = e.clientY;
+  photoPos.x += dx;
+  photoPos.y += dy;
+  render();
+});
+
+canvas.addEventListener('pointerup', (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+  try { canvas.releasePointerCapture && canvas.releasePointerCapture(e.pointerId); } catch(_) {}
+});
+
+canvas.addEventListener('pointercancel', () => { isDragging = false; });
+
+// text inputs and mask controls
 ['headline','details','textColor','maskX','maskY','maskD'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.addEventListener('input', () => {
@@ -218,19 +302,51 @@ document.getElementById('photoInput').addEventListener('change', e => {
 function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
 function render(){
   clearCanvas();
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // draw background (if any)
+  if(bgImg && bgImg.complete){
+    // draw background to fill canvas while preserving aspect (cover)
+    const bw = bgImg.width || 1, bh = bgImg.height || 1;
+    const scale = Math.max(canvas.width / bw, canvas.height / bh);
+    const dw = bw * scale, dh = bh * scale;
+    const dx = (canvas.width - dw) / 2; const dy = (canvas.height - dh) / 2;
+    ctx.drawImage(bgImg, dx, dy, dw, dh);
+  } else {
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
 
   if(photoLoaded){
     const dia = canvas.width * (mask.d/100);
     const cx = canvas.width * (mask.x/100);
     const cy = canvas.height * (mask.y/100);
-    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.clip();
-    const iw = photoImg.width, ih = photoImg.height;
-    const scale = Math.max(dia/iw, dia/ih);
-    const sw = iw * scale, sh = ih * scale;
-    ctx.drawImage(photoImg, cx - sw/2, cy - sh/2, sw, sh);
+
+    // compute base scale to cover the circle
+    const iw = photoImg.width || 1, ih = photoImg.height || 1;
+    const baseScale = Math.max(dia/iw, dia/ih);
+    const usedScale = baseScale * (photoScale || 1);
+
+    const sw = iw * usedScale;
+    const sh = ih * usedScale;
+
+    // center position adjusted by user offset (photoPos is in pixels)
+    const drawX = cx - sw/2 + (photoPos.x || 0);
+    const drawY = cy - sh/2 + (photoPos.y || 0);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx,cy,dia/2,0,Math.PI*2);
+    ctx.closePath();
+    ctx.clip();
+
+    ctx.drawImage(photoImg, drawX, drawY, sw, sh);
     ctx.restore();
-    ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth = Math.max(2, canvas.width/200); ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.stroke();
+
+    // draw subtle ring
+    ctx.beginPath();
+    ctx.arc(cx,cy,dia/2,0,Math.PI*2);
+    ctx.closePath();
+    ctx.lineWidth = Math.max(2, canvas.width/200);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.stroke();
   }
 
   const headline = document.getElementById('headline').value || meta.title;
@@ -256,7 +372,7 @@ function render(){
 
 // small text wrapper
 function wrapText(context, text, x, y, maxWidth, lineHeight){
-  const words = text.split(' ');
+  const words = (text||'').split(' ');
   let line = '';
   for(let n=0;n<words.length;n++){
     const testLine = line + words[n] + ' ';
@@ -269,6 +385,30 @@ function wrapText(context, text, x, y, maxWidth, lineHeight){
   context.fillText(line, x, y);
 }
 
+// Background gallery
+function buildBackgroundGallery(){
+  const list = document.getElementById('bgList');
+  if(!list) return;
+  list.innerHTML = '';
+  BACKGROUNDS.forEach((url, idx) => {
+    const box = document.createElement('div');
+    box.style.width = '72px'; box.style.height = '72px'; box.style.borderRadius = '6px'; box.style.overflow = 'hidden'; box.style.cursor = 'pointer'; box.style.border = '2px solid transparent'; box.title = 'Background ' + (idx + 1);
+
+    const img = document.createElement('img');
+    img.src = url; img.alt = 'bg' + (idx + 1);
+    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+    box.appendChild(img);
+
+    box.addEventListener('click', () => {
+      Array.from(list.children).forEach(c => c.style.border = '2px solid transparent');
+      box.style.border = '2px solid #0b63d6';
+      bgImg = new Image(); bgImg.crossOrigin = 'anonymous'; bgImg.src = url; bgImg.onload = () => render();
+    });
+
+    list.appendChild(box);
+  });
+}
+
 // ---------------- Payment flow ----------------
 
 // helper: check if user has valid VIP for this event
@@ -277,7 +417,6 @@ function hasValidVip(){
     const raw = localStorage.getItem('peron_vip');
     if(!raw) return false;
     const obj = JSON.parse(raw);
-    // obj should be { phone, expiry, event }
     if(!obj.expiry) return false;
     return Date.now() < obj.expiry && obj.event === slug;
   } catch(e){ return false; }
@@ -290,7 +429,6 @@ function saveVip(phone, expiresMs){
 }
 
 function updateButtonsState(){
-  // If event requires payment and user doesn't have vip -> hide free download and show payDownload
   const requires = !!meta.payBeforeDownload;
   if(requires && !hasValidVip()){
     payDownloadBtn.style.display = 'inline-block';
@@ -307,7 +445,7 @@ function updateButtonsState(){
 payDownloadBtn.addEventListener('click', ()=>{
   if(!chosen){ alert('Choose a template first.'); return; }
   payForText.textContent = `Pay Ksh ${meta.price} to download this template (${meta.title}).`;
-  payAmount.value = meta.price || 20; // dynamic amount
+  payAmount.value = meta.price || 20;
   paymentModal.style.display = 'flex';
   payNotice.textContent = '';
 });
@@ -319,8 +457,6 @@ payCancel.addEventListener('click', ()=>{ paymentModal.style.display = 'none'; }
 payConfirm.addEventListener('click', async ()=>{
   const phoneVal = (payPhone.value || '').trim();
   const amountVal = Number(payAmount.value) || meta.price || 20;
-
-  // normalize phone: accept 07XXXXXXXX or 2547XXXXXXXX
   let phoneToSend = null;
   if(/^07\d{8}$/.test(phoneVal)) {
     phoneToSend = '254' + phoneVal.substring(1);
@@ -339,94 +475,4 @@ payConfirm.addEventListener('click', async ()=>{
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error('Server error: ' + res.status);
-    const j = await res.json();
-    if(!j.checkoutId){
-      throw new Error('Invalid server response: missing checkoutId');
     }
-    payNotice.textContent = 'STK push sent — waiting for confirmation...';
-    // poll status
-    await pollPaymentStatus(j.checkoutId, phoneToSend);
-  } catch(err){
-    console.error(err);
-    payNotice.style.color = 'crimson';
-    payNotice.textContent = 'Payment initiation failed: ' + (err.message || err);
-  } finally {
-    payConfirm.disabled = false;
-  }
-});
-
-// poll backend for payment status
-async function pollPaymentStatus(checkoutId, phone){
-  const timeoutMs = 120000; // 2 minutes
-  const intervalMs = 3000;
-  const start = Date.now();
-  while(true){
-    try {
-      const res = await fetch(MPESA_CONFIG.statusUrl + '?checkoutId=' + encodeURIComponent(checkoutId));
-      if(res.ok){
-        const j = await res.json();
-        const st = (j.status || '').toString().toLowerCase();
-        if(st === 'success' || st === 'ok' || st === 'completed'){
-          // if your backend returns expiry timestamp (ms) use that; otherwise set a default short expiry (e.g., 12 hours)
-          const expiry = j.expiry || (Date.now() + (1000 * 60 * 60 * 12));
-          saveVip(phone, expiry);
-          payNotice.style.color = 'green';
-          payNotice.textContent = 'Payment confirmed — downloading now!';
-          paymentModal.style.display = 'none';
-          // automatically trigger download
-          setTimeout(()=>generateAndDownload(), 600);
-          return;
-        } else if(st === 'failed' || st === 'error' || st === 'cancelled'){
-          payNotice.style.color = 'crimson';
-          payNotice.textContent = 'Payment failed or canceled. Please try again.';
-          return;
-        } // else pending -> continue
-      } else {
-        console.warn('Status poll HTTP', res.status);
-      }
-    } catch(e){
-      console.warn('poll error', e);
-    }
-    if(Date.now() - start > timeoutMs){
-      payNotice.style.color = 'crimson';
-      payNotice.textContent = 'Payment not confirmed within 2 minutes. Please check your phone or try again.';
-      return;
-    }
-    await new Promise(r=>setTimeout(r, intervalMs));
-  }
-}
-
-// download (free) - allowed only if event not gated or vip valid
-downloadBtn.addEventListener('click', ()=>{
-  if(meta.payBeforeDownload && !hasValidVip()){
-    alert('This template requires payment before downloading. Press Pay & Download to pay via M-Pesa.');
-    return;
-  }
-  generateAndDownload();
-});
-
-// generate PNG from canvas and download
-function generateAndDownload(){
-  render();
-  canvas.toBlob(blob=>{
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    const base = slug + '-' + (chosen? chosen.split('/').pop().replace(/\.[^.]+$/,'') : 'custom');
-    a.download = base + '.png';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
-  }, 'image/png');
-}
-
-// reset
-resetBtn.addEventListener('click', ()=>{ document.getElementById('headline').value=''; document.getElementById('details').value=''; document.getElementById('textColor').value='#ffffff'; document.getElementById('maskX').value=50; document.getElementById('maskY').value=28; document.getElementById('maskD').value=48; mask.x=50; mask.y=28; mask.d=48; render(); });
-
-// init
-buildTemplates();
-render();
-updateButtonsState();
-
-</script>
-</body>
-</html>
