@@ -31,6 +31,7 @@
     .menu-icon {
       font-size: 28px;
       cursor: pointer;
+      user-select: none;
     }
 
     .dropdown {
@@ -53,7 +54,8 @@
       border-bottom: 1px solid #27ae60;
     }
 
-    .dropdown a:hover {
+    .dropdown a:hover,
+    .dropdown a:focus {
       background-color: #27ae60;
     }
 
@@ -65,11 +67,13 @@
     .video-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 56.25%;
+      max-width: 900px;
       margin: 20px auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      padding-top: 56.25%; /* 16:9 */
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       border-radius: 10px;
       overflow: hidden;
+      background: #000;
     }
 
     .video-wrapper video {
@@ -78,6 +82,15 @@
       left: 0;
       width: 100%;
       height: 100%;
+      object-fit: cover;
+    }
+
+    .buttons-row {
+      margin-top: 18px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
     .button {
@@ -90,9 +103,11 @@
       border-radius: 5px;
       font-size: 16px;
       text-decoration: none;
+      cursor: pointer;
     }
 
-    .button:hover {
+    .button:hover,
+    .button:focus {
       background-color: #27ae60;
     }
 
@@ -121,6 +136,7 @@
       header .logo {
         font-size: 20px;
       }
+      .video-wrapper { padding-top: 66.66%; } /* taller on small screens */
     }
   </style>
 </head>
@@ -129,8 +145,15 @@
 <!-- Header with dropdown menu -->
 <header>
   <div class="logo">Peron Tips</div>
-  <div class="menu-icon" onclick="toggleDropdown()">☰</div>
-  <div class="dropdown" id="dropdown-menu">
+
+  <div style="display:flex;gap:10px;align-items:center">
+    <!-- Quick create flyer button in header -->
+    <a class="button" href="https://perontips-fliers.vercel.app/creator.html" target="_blank" rel="noopener" aria-label="Open flyer editor (new tab)">Create Flyer</a>
+
+    <div class="menu-icon" onclick="toggleDropdown()" aria-label="Open menu" role="button" tabindex="0">☰</div>
+  </div>
+
+  <div class="dropdown" id="dropdown-menu" aria-hidden="true">
     <a href="index.html">Home</a>
     <a href="high-school/high-school.html">High School Questions</a>
     <a href="university/university.html">University Questions</a>
@@ -143,6 +166,10 @@
     <a href="general/general.html">General Knowledge / Mixed</a>
     <a href="tech/tech.html">Tech / Digital Skills</a>
     <a href="health/health.html">Health & Lifestyle</a>
+
+    <!-- Flyers link -->
+    <a href="https://perontips-fliers.vercel.app/" target="_blank" rel="noopener">Fliers / Create Event Flyers</a>
+
     <!-- NEW links -->
     <a href="bio.html">Founder Bio</a>
     <a href="terms.html">Terms &amp; Conditions</a>
@@ -153,19 +180,23 @@
   <h2>WELCOME TO:</h2>
   <h1>PERON TIPS</h1>
 
-  <!-- Auto-playing video with sound -->
+  <!-- Auto-playing video (muted by default for autoplay to work reliably) -->
   <div class="video-wrapper">
-    <video id="introVideo" autoplay muted playsinline>
+    <video id="introVideo" autoplay muted playsinline loop>
       <source src="1749408547544.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
   </div>
 
   <p><strong>CHOOSE YOUR QUIZ FIELDS NOW</strong></p>
-  <a href="page.html" class="button">CHOOSE YOUR QUIZ NOW</a>
-  <a href="refer.html" class="button orange-button">Refer Friends &amp; Earn</a>
-  <!-- NEW button -->
-  <a href="terms.html" class="button">Terms &amp; Conditions</a>
+
+  <div class="buttons-row">
+    <a href="page.html" class="button">CHOOSE YOUR QUIZ NOW</a>
+    <a href="refer.html" class="button orange-button">Refer Friends &amp; Earn</a>
+    <a href="terms.html" class="button">Terms &amp; Conditions</a>
+    <!-- Prominent flyer editor CTA -->
+    <a href="https://perontips-fliers.vercel.app/creator.html" class="button" style="background:#0b63d6">Open Flyer Editor</a>
+  </div>
 
   <div class="note">
     <h3>Score Higher Per Section!</h3>
@@ -181,30 +212,49 @@
 <script>
   function toggleDropdown() {
     var menu = document.getElementById("dropdown-menu");
-    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+    var shown = menu.style.display === "flex";
+    menu.style.display = shown ? "none" : "flex";
+    menu.setAttribute('aria-hidden', shown ? 'true' : 'false');
   }
 
-  window.onclick = function(event) {
-    if (!event.target.matches('.menu-icon')) {
-      var dropdown = document.getElementById("dropdown-menu");
-      if (dropdown && dropdown.style.display === "flex") {
-        dropdown.style.display = "none";
-      }
+  // Close dropdown when clicking outside
+  window.addEventListener('click', function(event) {
+    var menu = document.getElementById("dropdown-menu");
+    var toggle = document.querySelector('.menu-icon');
+    if (!menu) return;
+    if (menu.style.display === "flex" && !toggle.contains(event.target) && !menu.contains(event.target)) {
+      menu.style.display = "none";
+      menu.setAttribute('aria-hidden', 'true');
     }
-  }
+  });
 
-  // Attempt to unmute video after load (browser may block it)
+  // Keyboard accessibility for the menu icon (Enter/Space)
+  document.querySelectorAll('.menu-icon').forEach(function(el) {
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDropdown();
+      }
+    });
+  });
+
+  // Attempt to unmute video after load — most browsers block autoplay with sound,
+  // so we keep muted as the fallback to avoid play errors.
   window.addEventListener("load", function () {
     const video = document.getElementById("introVideo");
-    video.muted = false;
-    video.play().catch(err => {
-      // Browser blocked autoplay with sound; fallback to muted autoplay
-      console.warn("Autoplay with sound failed. Browser policy may block it.");
+    // try to unmute (some browsers allow it if user recently interacted)
+    try {
+      video.muted = false;
+      video.play().catch(err => {
+        // Browser blocked autoplay with sound; keep it muted for a smooth UX
+        video.muted = true;
+        video.play().catch(()=>{});
+      });
+    } catch (e) {
       video.muted = true;
-      video.play();
-    });
+    }
   });
 </script>
 
 </body>
-  </html>
+</html>
