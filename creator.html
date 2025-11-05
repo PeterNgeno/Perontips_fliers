@@ -115,10 +115,9 @@
 <script>
 // ----------------- MPESA CONFIG - UPDATE THESE TO MATCH YOUR SERVER -----------------
 const MPESA_CONFIG = {
-  // When frontend POSTs to checkoutUrl the backend should trigger STK push and return { checkoutId }
-  checkoutUrl: '/api/mpesa/stk',       // <<--- change to your endpoint
-  // Poll this endpoint to get the status. Should return { status: 'pending'|'success'|'failed', expiry?: <ms timestamp> }
-  statusUrl: '/api/mpesa/status'       // <<--- change to your endpoint
+  // Absolute endpoints on your Render backend
+  checkoutUrl: 'https://perontips-fliers-backend.onrender.com/api/mpesa/stk',
+  statusUrl:   'https://perontips-fliers-backend.onrender.com/api/mpesa/status'
 };
 // -----------------------------------------------------------------------------------
 
@@ -127,8 +126,8 @@ const MPESA_CONFIG = {
  You can set payBeforeDownload=true for any event you want to charge.
 */
 const EVENTS = {
-  'engagement': { title:'Engagement / Proposal', samples:['flyers/engagement-1.png','flyers/engagement-2.png'], payBeforeDownload: true, price: 30 },
-  'baby-shower': { title:'Baby Shower', samples:['flyers/baby-shower-1.png','flyers/baby-shower-2.png'], payBeforeDownload: true, price: 30 },
+  'engagement': { title:'Engagement / Proposal', samples:['flyers/engagement-1.png','flyers/engagement-2.png'], payBeforeDownload: true, price: 20 },
+  'baby-shower': { title:'Baby Shower', samples:['flyers/baby-shower-1.png','flyers/baby-shower-2.png'], payBeforeDownload: true, price: 20 },
   // (all other events - set payBeforeDownload false by default)
   'bridal-shower': { title:'Bridal Shower', samples:['flyers/bridal-shower-1.png'], payBeforeDownload:false },
   'anniversary': { title:'Anniversary', samples:['flyers/anniversary-1.png'], payBeforeDownload:false },
@@ -141,7 +140,7 @@ const EVENTS = {
 // ----------------- Helpers -----------------
 function qs(name){ const params = new URLSearchParams(location.search); return params.get(name); }
 const slug = qs('event') || 'engagement';
-const meta = EVENTS[slug] || { title:'Custom Event', samples:[], payBeforeDownload:false, price:30 };
+const meta = EVENTS[slug] || { title:'Custom Event', samples:[], payBeforeDownload:false, price:20 };
 
 document.getElementById('pageTitle').textContent = 'PERON TIPS — ' + meta.title;
 document.getElementById('pageSubtitle').textContent = 'Templates for ' + meta.title + '.';
@@ -308,7 +307,7 @@ function updateButtonsState(){
 payDownloadBtn.addEventListener('click', ()=>{
   if(!chosen){ alert('Choose a template first.'); return; }
   payForText.textContent = `Pay Ksh ${meta.price} to download this template (${meta.title}).`;
-  payAmount.value = meta.price || 30;
+  payAmount.value = meta.price || 20; // dynamic amount
   paymentModal.style.display = 'flex';
   payNotice.textContent = '';
 });
@@ -319,15 +318,23 @@ payCancel.addEventListener('click', ()=>{ paymentModal.style.display = 'none'; }
 // confirm (start STK push)
 payConfirm.addEventListener('click', async ()=>{
   const phoneVal = (payPhone.value || '').trim();
-  const amountVal = Number(payAmount.value) || meta.price || 30;
-  if(!/^0?7\d{8}$/.test(phoneVal)){
-    payNotice.style.color = 'crimson'; payNotice.textContent = 'Enter a valid 07xxxxxxxx phone number.';
+  const amountVal = Number(payAmount.value) || meta.price || 20;
+
+  // normalize phone: accept 07XXXXXXXX or 2547XXXXXXXX
+  let phoneToSend = null;
+  if(/^07\d{8}$/.test(phoneVal)) {
+    phoneToSend = '254' + phoneVal.substring(1);
+  } else if(/^2547\d{8}$/.test(phoneVal)) {
+    phoneToSend = phoneVal;
+  } else {
+    payNotice.style.color = 'crimson'; payNotice.textContent = 'Enter a valid phone number (07xxxxxxxx or 2547xxxxxxxx).';
     return;
   }
+
   payNotice.style.color = 'black'; payNotice.textContent = 'Sending STK push... please approve the prompt on your phone.';
   payConfirm.disabled = true;
   try {
-    const payload = { phone: phoneVal, amount: amountVal, event: slug, template: chosen };
+    const payload = { phone: phoneToSend, amount: amountVal, event: slug, template: chosen };
     const res = await fetch(MPESA_CONFIG.checkoutUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -340,7 +347,7 @@ payConfirm.addEventListener('click', async ()=>{
     }
     payNotice.textContent = 'STK push sent — waiting for confirmation...';
     // poll status
-    await pollPaymentStatus(j.checkoutId, phoneVal);
+    await pollPaymentStatus(j.checkoutId, phoneToSend);
   } catch(err){
     console.error(err);
     payNotice.style.color = 'crimson';
@@ -360,7 +367,8 @@ async function pollPaymentStatus(checkoutId, phone){
       const res = await fetch(MPESA_CONFIG.statusUrl + '?checkoutId=' + encodeURIComponent(checkoutId));
       if(res.ok){
         const j = await res.json();
-        if(j.status === 'success'){
+        const st = (j.status || '').toString().toLowerCase();
+        if(st === 'success' || st === 'ok' || st === 'completed'){
           // if your backend returns expiry timestamp (ms) use that; otherwise set a default short expiry (e.g., 12 hours)
           const expiry = j.expiry || (Date.now() + (1000 * 60 * 60 * 12));
           saveVip(phone, expiry);
@@ -370,7 +378,7 @@ async function pollPaymentStatus(checkoutId, phone){
           // automatically trigger download
           setTimeout(()=>generateAndDownload(), 600);
           return;
-        } else if(j.status === 'failed'){
+        } else if(st === 'failed' || st === 'error' || st === 'cancelled'){
           payNotice.style.color = 'crimson';
           payNotice.textContent = 'Payment failed or canceled. Please try again.';
           return;
@@ -421,4 +429,4 @@ updateButtonsState();
 
 </script>
 </body>
-          </html>
+</html>
