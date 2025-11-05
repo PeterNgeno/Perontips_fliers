@@ -1,192 +1,161 @@
-      </ul>
-      <div style="margin-top:8px"><a class="btn" href="creator-church.html">Open Creator →</a></div>
-    </div>
-
-    <div class="card cat">
-      <h3>🏫 Education & Students</h3>
-      <ul>
-        <li>Academic Conference / Seminar</li>
-        <li>Parents' Day / Prize-Giving Day</li>
-        <li>Talent Show / Drama Festival</li>
-      </ul>
-      <div style="margin-top:8px"><a class="btn" href="creator-education.html">Open Creator →</a></div>
-    </div>
-
-    <div class="card cat">
-      <h3>💼 Business & Professional</h3>
-      <ul>
-        <li>Business Opening / Product Promotion</li>
-        <li>Training / Workshop</li>
-        <li>Job Vacancy / Career Fair</li>
-      </ul>
-      <div style="margin-top:8px"><a class="btn" href="creator-business.html">Open Creator →</a></div>
-    </div>
-
-    <div class="card cat">
-      <h3>💖 Community & Social</h3>
-      <ul>
-        <li>Charity Event / Fundraiser</li>
-        <li>Sports Tournament</li>
-        <li>Community Service</li>
-      </ul>
-      <div style="margin-top:8px"><a class="btn" href="creator-community.html">Open Creator →</a></div>
-    </div>
-
-    <div class="card cat">
-      <h3>🎨 Creative / Miscellaneous</h3>
-      <ul>
-        <li>Music Concert</li>
-        <li>Art Exhibition</li>
-        <li>Fashion Show</li>
-      </ul>
-      <div style="margin-top:8px"><a class="btn" href="creator-creative.html">Open Creator →</a></div>
-    </div>
-  </div>
-</main>
-
-<footer style="margin-top:20px;color:var(--muted)">
-  <small>Tip: each creator page ships with sample flyer overlay paths. Replace or upload your own PNG overlays (transparent circular area) in /flyers/.</small>
-</footer>
-
-  </div>
-</body>
-</html><!-- ===================== creator-template (copy as creator-personal.html, creator-church.html, etc.) ===================== --><!-- Example: creator-personal.html --><!doctype html>
-
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PERON TIPS — Creator (Personal & Family)</title>
-  <style>
-    :root{--accent:#0b63d6;--muted:#6b7280}
-    body{font-family:Inter,system-ui,Arial;margin:0;background:#f5f9ff;color:#071126}
-    .wrap{max-width:1200px;margin:18px auto;padding:16px}
-    header{display:flex;align-items:center;justify-content:space-between}
-    h2{color:var(--accent);margin:0}
-    .layout{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:14px}
-    .panel{background:white;padding:12px;border-radius:10px;border:1px solid #e6eefb}
-    .thumb{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#eaeef8}
-    .templates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eefb;margin-top:6px}
-    .small{font-size:13px;color:var(--muted)}
-    .stage{display:flex;align-items:center;justify-content:center;padding:12px}
-    canvas{background:#fff;border-radius:10px;box-shadow:0 8px 30px rgba(11,99,214,0.06)}
-    .toolbar{display:flex;gap:8px;margin-top:10px}
-    .btn{background:var(--accent);color:white;padding:8px 10px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
-    .mutedbtn{background:#eef4ff;color:var(--accent);padding:8px;border-radius:8px;border:1px solid #dbefff}
-    @media(max-width:980px){.layout{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PERON TIPS — All Events</title>
+<link rel="icon" href="data:," />
+<style>
+  :root{
+    --accent:#0b63d6;
+    --muted:#6b7280;
+    --card:#ffffff;
+    --bg:#fbfdff;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#071126;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:36px auto;padding:20px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{margin:0;font-size:28px;color:var(--accent)}
+  p.lead{margin:6px 0 0;color:var(--muted)}
+  .controls{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .search{flex:1;min-width:200px}
+  input.searchInput{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6eefb;background:white}
+  .btn{background:var(--accent);color:white;padding:10px 12px;border-radius:10px;text-decoration:none;display:inline-block}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  .card{background:var(--card);padding:14px;border-radius:var(--radius);border:1px solid #e9f0fb;box-shadow:0 8px 20px rgba(11,99,214,0.04)}
+  .card h3{margin:0 0 8px;font-size:16px;color:#073b8c}
+  .card ul{margin:0;padding-left:18px;color:var(--muted)}
+  .card a.eventBtn{display:inline-block;margin-top:10px;background:#eff7ff;color:var(--accent);padding:8px 10px;border-radius:8px;text-decoration:none;border:1px solid #dbefff}
+  footer{margin-top:26px;color:var(--muted);font-size:13px}
+  @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){header{flex-direction:column;align-items:flex-start} .grid{grid-template-columns:1fr}}
+  .highlight{display:inline-block;background:linear-gradient(90deg,#eaf4ff,#fff);padding:6px 8px;border-radius:8px;border:1px solid #e7f0ff;color:var(--accent);font-weight:600}
+</style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div>
-        <h2>PERON TIPS — Personal & Family Creator</h2>
-        <div class="small">Templates tailored for personal & family events.</div>
+        <h1>PERON TIPS</h1>
+        <p class="lead">Create event fliers quickly — choose an event type below, open the editor, replace text and upload a photo that shows through a round transparent region.</p>
+      </div>
+      <div style="text-align:right">
+        <div class="highlight">Easy • Fast • Mobile-friendly</div>
+        <div style="margin-top:8px"><a class="btn" href="creator.html">Open Editor (choose event there)</a></div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="search" style="flex:1">
+        <input id="searchInput" class="searchInput" placeholder="Search events (e.g. 'baby', 'church', 'business')">
       </div>
       <div>
-        <a class="mutedbtn" href="index.html">← Back</a>
+        <a class="btn" href="creator.html?event=engagement">Quick: Engagement</a>
       </div>
-    </header><div class="layout">
-  <aside class="panel">
-    <h3 style="margin-top:0">Templates</h3>
-    <div class="templates" id="templates"></div>
-
-    <h4 style="margin-top:12px">Upload Photo</h4>
-    <input type="file" id="photoInput" accept="image/*">
-    <div class="small">Tip: choose a close-up portrait for best results.</div>
-
-    <h4 style="margin-top:12px">Text</h4>
-    <label>Headline</label>
-    <input id="headline" placeholder="e.g. Jane & John — Engagement">
-    <label>Details</label>
-    <textarea id="details" rows="3" placeholder="Date • Time • Venue"></textarea>
-    <label>Text color</label>
-    <input id="textColor" type="color" value="#ffffff">
-
-    <h4 style="margin-top:12px">Mask (circle)</h4>
-    <label>Move X</label>
-    <input id="maskX" type="range" min="0" max="100" value="50">
-    <label>Move Y</label>
-    <input id="maskY" type="range" min="0" max="100" value="28">
-    <label>Diameter</label>
-    <input id="maskD" type="range" min="10" max="100" value="48">
-
-    <div class="toolbar">
-      <button id="downloadBtn" class="btn">Generate & Download</button>
-      <button id="resetBtn" class="mutedbtn">Reset</button>
-    </div>
-  </aside>
-
-  <section>
-    <div class="panel" style="min-height:640px;display:flex;flex-direction:column">
-      <div class="stage" style="flex:1">
-        <canvas id="canvas" width="700" height="1000"></canvas>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
-        <div class="small">Preview — align the circular window to match the transparent area of the overlay.</div>
+      <div>
+        <a class="btn" href="creator.html?event=baby-shower">Quick: Baby Shower</a>
       </div>
     </div>
-  </section>
-</div>
 
-  </div><script>
-// Sample flyers for this category: replace with real paths or upload to /flyers/
-const flyers = [
-  {id:'personal-1', name:'Round Classic', src:'flyers/personal1.png'},
-  {id:'personal-2', name:'Soft Blue', src:'flyers/personal2.png'},
-  {id:'personal-3', name:'Minimal Gold', src:'flyers/personal3.png'}
+    <div id="cardsGrid" class="grid" aria-live="polite">
+      <!-- Cards are populated by script -->
+    </div>
+
+    <footer>
+      <small>Tip: Upload your PNG flyer overlays (with round transparent area) into <code>/flyers/</code> using filenames like <code>engagement-1.png</code> or <code>baby-shower-1.png</code>. Then click a specific event to open the editor preloaded for that event.</small>
+    </footer>
+  </div>
+
+<script>
+// EVENTS list — slug, title, and sample label (links go to creator.html?event=slug)
+const EVENTS = [
+  {slug:'engagement', title:'Engagement / Proposal Announcement'},
+  {slug:'baby-shower', title:'Baby Shower'},
+  {slug:'bridal-shower', title:'Bridal Shower'},
+  {slug:'anniversary', title:'Anniversary Celebration'},
+  {slug:'house-warming', title:'House Warming / Thanksgiving Party'},
+  {slug:'funeral', title:'Funeral / Memorial Service'},
+  {slug:'family-reunion', title:'Family Reunion'},
+
+  {slug:'revival-service', title:'Revival Service'},
+  {slug:'youth-conference', title:'Youth Conference'},
+  {slug:'womens-fellowship', title:`Women's Fellowship / Ladies' Meeting`},
+  {slug:'mens-fellowship', title:"Men's Fellowship"},
+  {slug:'choir-concert', title:'Choir Concert / Worship Night'},
+  {slug:'bible-study', title:'Bible Study / Prayer Meeting'},
+  {slug:'fundraising', title:'Fundraising / Thanksgiving Sunday'},
+
+  {slug:'academic-conference', title:'Academic Conference / Seminar'},
+  {slug:'parents-day', title:"Parents' Day / Prize-Giving Day"},
+  {slug:'talent-show', title:'Talent Show / Drama Festival'},
+  {slug:'alumni-reunion', title:'Alumni Reunion'},
+  {slug:'class-party', title:'Class / School Party'},
+
+  {slug:'business-opening', title:'Business Opening / Launch'},
+  {slug:'product-promotion', title:'Product Promotion'},
+  {slug:'sales-offer', title:'Sales / Discount Offer'},
+  {slug:'real-estate', title:'Real Estate / Land for Sale'},
+  {slug:'training', title:'Training / Workshop / Seminar'},
+  {slug:'job-vacancy', title:'Job Vacancy'},
+  {slug:'career-fair', title:'Career Fair'},
+  {slug:'corporate-event', title:'Corporate Event / Company Anniversary'},
+
+  {slug:'charity', title:'Charity Event / Fundraiser'},
+  {slug:'sports-tournament', title:'Sports Tournament / Match'},
+  {slug:'political-rally', title:'Political Rally / Campaign'},
+  {slug:'environmental-cleanup', title:'Environmental Cleanup / Community Service'},
+  {slug:'cultural-festival', title:'Cultural Festival'},
+
+  {slug:'music-concert', title:'Music Concert'},
+  {slug:'art-exhibition', title:'Art Exhibition'},
+  {slug:'movie-night', title:'Movie Night / Film Premiere'},
+  {slug:'fashion-show', title:'Fashion Show'},
+  {slug:'talent-competition', title:'Talent Competition'}
 ];
 
-const templatesDiv = document.getElementById('templates');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let overlayImg = new Image();
-let photoImg = new Image();
-let photoLoaded=false;
-let chosen=null;
-const mask = {x:50,y:28,d:48};
+// Render cards
+const grid = document.getElementById('cardsGrid');
+function renderCards(list){
+  grid.innerHTML = '';
+  list.forEach(e=>{
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <h3>${escapeHtml(e.title)}</h3>
+      <ul>
+        <li><small class="muted">Create beautiful fliers for this event</small></li>
+      </ul>
+      <div style="margin-top:10px">
+        <a class="eventBtn" href="creator.html?event=${encodeURIComponent(e.slug)}">Open ${shortLabel(e.title)}</a>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
 
-flyers.forEach(f=>{
-  const d = document.createElement('div'); d.style.cursor='pointer';
-  const img = document.createElement('img'); img.className='thumb'; img.src=f.src; img.alt=f.name; img.style.height='86px';
-  const lab = document.createElement('div'); lab.textContent=f.name; lab.style.fontSize='13px'; lab.style.marginTop='6px'; lab.style.color='#0b63d6';
-  d.appendChild(img); d.appendChild(lab);
-  d.onclick = ()=>selectTemplate(f);
-  templatesDiv.appendChild(d);
+function shortLabel(title){
+  if(title.length > 26) return title.split(' ')[0];
+  return title.split(' / ')[0];
+}
+
+// search
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', ()=>{
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q) return renderCards(EVENTS);
+  const filt = EVENTS.filter(e => e.title.toLowerCase().includes(q) || e.slug.includes(q));
+  renderCards(filt.length ? filt : [{slug:'', title:'No results — try another search'}]);
 });
 
-function selectTemplate(f){ chosen=f; overlayImg=new Image(); overlayImg.crossOrigin='anonymous'; overlayImg.src=f.src; overlayImg.onload = ()=>{ const maxW=900; const scale=Math.min(1,maxW/overlayImg.width); canvas.width=Math.round(overlayImg.width*scale); canvas.height=Math.round(overlayImg.height*scale); render(); } overlayImg.onerror=()=>alert('Could not load overlay: '+f.src); }
+// initial render
+renderCards(EVENTS);
 
-document.getElementById('photoInput').addEventListener('change', e=>{ const file=e.target.files[0]; if(!file) return; const url=URL.createObjectURL(file); photoImg=new Image(); photoImg.crossOrigin='anonymous'; photoImg.src=url; photoImg.onload=()=>{ photoLoaded=true; render(); URL.revokeObjectURL(url); }; });
-
-['headline','details','textColor','maskX','maskY','maskD'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', onInputChange); });
-function onInputChange(){ mask.x=Number(document.getElementById('maskX').value); mask.y=Number(document.getElementById('maskY').value); mask.d=Number(document.getElementById('maskD').value); render(); }
-
-function clear(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
-function render(){ clear(); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  if(photoLoaded){ const dia=canvas.width*(mask.d/100); const cx=canvas.width*(mask.x/100); const cy=canvas.height*(mask.y/100); ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.clip(); const iw=photoImg.width, ih=photoImg.height; const scale=Math.max(dia/iw,dia/ih); const sw=iw*scale, sh=ih*scale; ctx.drawImage(photoImg, cx-sw/2, cy-sh/2, sw, sh); ctx.restore(); ctx.beginPath(); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth=Math.max(2,canvas.width/200); ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.stroke(); }
-  const headline=document.getElementById('headline').value||'Your Event Title'; const details=document.getElementById('details').value||'Date • Time • Venue'; const textColor=document.getElementById('textColor').value||'#ffffff'; ctx.textAlign='center'; ctx.fillStyle=textColor; ctx.font=`${Math.round(canvas.width/16)}px Inter, sans-serif`; wrapText(ctx, headline, canvas.width/2, canvas.height*0.55, canvas.width*0.86, Math.round(canvas.width/14)); ctx.font=`${Math.round(canvas.width/32)}px Inter, sans-serif`; wrapText(ctx, details, canvas.width/2, canvas.height*0.72, canvas.width*0.86, Math.round(canvas.width/28)); if(overlayImg && overlayImg.complete){ ctx.drawImage(overlayImg,0,0,canvas.width,canvas.height); } if(!overlayImg.complete){ ctx.beginPath(); const cx=canvas.width*(mask.x/100); const cy=canvas.height*(mask.y/100); const dia=canvas.width*(mask.d/100); ctx.arc(cx,cy,dia/2,0,Math.PI*2); ctx.closePath(); ctx.lineWidth=2; ctx.strokeStyle='rgba(11,99,214,0.25)'; ctx.stroke(); } }
-
-function wrapText(context,text,x,y,maxWidth,lineHeight){ const words=text.split(' '); let line=''; for(let n=0;n<words.length;n++){ const testLine=line+words[n]+' '; if(context.measureText(testLine).width>maxWidth && n>0){ context.fillText(line,x,y); line=words[n]+' '; y+=lineHeight; } else { line=testLine; } } context.fillText(line,x,y); }
-
-document.getElementById('downloadBtn').addEventListener('click', ()=>{ if(!chosen){ alert('Choose a template first.'); return; } render(); canvas.toBlob(blob=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='peron-'+(chosen?chosen.id:'custom')+'.png'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }, 'image/png'); });
-
-document.getElementById('resetBtn').addEventListener('click', ()=>{ document.getElementById('headline').value=''; document.getElementById('details').value=''; document.getElementById('textColor').value='#ffffff'; document.getElementById('maskX').value=50; document.getElementById('maskY').value=28; document.getElementById('maskD').value=48; mask.x=50; mask.y=28; mask.d=48; render(); });
-
-// initial placeholder
-(function init(){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle='#6b7280'; ctx.font='18px Inter, sans-serif'; ctx.textAlign='center'; ctx.fillText('Choose a template and upload a photo to start', canvas.width/2, canvas.height/2 -10); })();
-</script></body>
-</html><!-- ===================== Duplicate notes ===================== --><!--
-To create the other creator pages, copy the "creator-template" section and save each copy with the file names:
-  - creator-personal.html
-  - creator-church.html
-  - creator-education.html
-  - creator-business.html
-  - creator-community.html
-  - creator-creative.html
-
-Then inside each file update the `flyers` array to point to templates appropriate for that category (e.g. flyers/church1.png etc.), and update the page title & heading text if desired.
-
-If you want, I can generate all six ready-made creator HTMLs here (with different sample flyer file names prefilled). Tell me and I will add them into this document now.
--->
+// small escape helper
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
