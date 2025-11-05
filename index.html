@@ -32,6 +32,10 @@
   @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:640px){header{flex-direction:column;align-items:flex-start} .grid{grid-template-columns:1fr}}
   .highlight{display:inline-block;background:linear-gradient(90deg,#eaf4ff,#fff);padding:6px 8px;border-radius:8px;border:1px solid #e7f0ff;color:var(--accent);font-weight:600}
+  /* added muted */
+  .muted { color: var(--muted); font-size: 13px; }
+  /* small accessibility focus */
+  a:focus, button:focus { outline: 3px solid rgba(11,99,214,0.18); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -43,7 +47,7 @@
       </div>
       <div style="text-align:right">
         <div class="highlight">Easy • Fast • Mobile-friendly</div>
-        <div style="margin-top:8px"><a class="btn" href="creator.html">Open Editor (choose event there)</a></div>
+        <div style="margin-top:8px"><a class="btn" href="creator.html" rel="noopener" aria-label="Open the flyer editor">Open Editor (choose event there)</a></div>
       </div>
     </header>
 
@@ -52,12 +56,16 @@
         <input id="searchInput" class="searchInput" placeholder="Search events (e.g. 'baby', 'church', 'business')">
       </div>
       <div>
-        <a class="btn" href="creator.html?event=engagement">Quick: Engagement</a>
+        <a class="btn" href="creator.html?event=engagement" rel="noopener" aria-label="Quick open engagement template">Quick: Engagement</a>
       </div>
       <div>
-        <a class="btn" href="creator.html?event=baby-shower">Quick: Baby Shower</a>
+        <a class="btn" href="creator.html?event=baby-shower" rel="noopener" aria-label="Quick open baby shower template">Quick: Baby Shower</a>
       </div>
     </div>
+
+    <noscript>
+      <p style="color:var(--muted)">This page requires JavaScript to list events. Please enable JavaScript or open an event directly using <code>creator.html?event=engagement</code>.</p>
+    </noscript>
 
     <div id="cardsGrid" class="grid" aria-live="polite">
       <!-- Cards are populated by script -->
@@ -81,7 +89,7 @@ const EVENTS = [
 
   {slug:'revival-service', title:'Revival Service'},
   {slug:'youth-conference', title:'Youth Conference'},
-  {slug:'womens-fellowship', title:`Women's Fellowship / Ladies' Meeting`},
+  {slug:'womens-fellowship', title:"Women's Fellowship / Ladies' Meeting"},
   {slug:'mens-fellowship', title:"Men's Fellowship"},
   {slug:'choir-concert', title:'Choir Concert / Worship Night'},
   {slug:'bible-study', title:'Bible Study / Prayer Meeting'},
@@ -136,7 +144,10 @@ function renderCards(list){
 }
 
 function shortLabel(title){
-  if(title.length > 26) return title.split(' ')[0];
+  if (title.length > 26) {
+    // return first two words to be clearer
+    return title.split(' ').slice(0,2).join(' ');
+  }
   return title.split(' / ')[0];
 }
 
