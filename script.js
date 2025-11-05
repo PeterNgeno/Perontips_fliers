@@ -1,120 +1,322 @@
-// Peron Tips frontend → live backend integration
-const BACKEND_BASE = 'https://perontips-fliers-backend.onrender.com';
-const MAX_AMOUNT = 30;
+// script.js — updated to point to Render server and handle new API shape
+document.addEventListener('DOMContentLoaded', () => {
+  checkQuizVersion().then(() => {
+    let section = parseInt(localStorage.getItem('quizSection')) || 1;
+    let isRetry = localStorage.getItem('quizRetry') === 'true';
+    let phone = localStorage.getItem('quizPhone') || '';
+    const contentDiv = document.getElementById('content');
+    let questions = [];
 
-// DOM
-const categoriesEl=document.getElementById('categories'),templatesGridEl=document.getElementById('templatesGrid'),
-templateSelectEl=document.getElementById('templateSelect'),templateSearchEl=document.getElementById('templateSearch'),
-titleInput=document.getElementById('titleInput'),subtitleInput=document.getElementById('subtitleInput'),
-dateInput=document.getElementById('dateInput'),venueInput=document.getElementById('venueInput'),
-contactInput=document.getElementById('contactInput'),photoInput=document.getElementById('photoInput'),
-paymentPhoneInput=document.getElementById('paymentPhoneInput'),amountInput=document.getElementById('amountInput'),
-priceSpan=document.getElementById('priceSpan'),buyBtn=document.getElementById('buyBtn'),
-resetPaymentBtn=document.getElementById('resetPaymentBtn'),saveDraftBtn=document.getElementById('saveDraftBtn'),
-payStatus=document.getElementById('payStatus'),flierTitle=document.getElementById('flierTitle'),
-flierSubtitle=document.getElementById('flierSubtitle'),flierDate=document.getElementById('flierDate'),
-flierVenue=document.getElementById('flierVenue'),flierContact=document.getElementById('flierContact'),
-heroArea=document.getElementById('heroArea'),flierPriceTag=document.getElementById('flierPriceTag'),
-downloadBtn=document.getElementById('downloadBtn'),downloadPDFBtn=document.getElementById('downloadPDFBtn');
-document.getElementById('year').textContent=new Date().getFullYear();
+    // Backend base URL (your Render service)
+    const BACKEND_BASE = 'https://perontips-fliers-backend.onrender.com';
 
-// categories + templates
-const CATEGORIES={
-"Church & Faith-Based":["Crusades","Revival","Youth Conference","Choir Concert","Ordination"],
-"Personal & Family":["Wedding","Birthday","Graduation","Anniversary"],
-"Business & Professional":["Job Ad","Workshop","Launch"],
-"Community & Social":["Committee","Charity","Sports"],
-"Entertainment & Creative":["Music","Fashion","Movie"]
-};
-const TEMPLATES=[
-{id:"wedding1",title:"Wedding Invite",category:"Personal & Family",price:30,bg:"#db2777",color:"#fff"},
-{id:"crusade1",title:"Crusade Night",category:"Church & Faith-Based",price:20,bg:"#0b3b6f",color:"#fff"},
-{id:"job1",title:"Job Vacancy",category:"Business & Professional",price:10,bg:"#111827",color:"#fff"}
+    function showSectionSelector() {
+      contentDiv.innerHTML = `
+        <h2>Select Quiz Section</h2>
+        <select id="section-select">
+          ${Array.from({ length: 10 }, (_, i) =>
+            `<option value="${i + 1}" ${i + 1 === section ? 'selected' : ''}>Section ${String.fromCharCode(65 + i)}</option>`
+          ).join('')}
+        </select>
+        <button id="select-btn">Continue</button>
+      `;
+      document.getElementById('select-btn').addEventListener('click', () => {
+        section = parseInt(document.getElementById('section-select').value, 10);
+        localStorage.setItem('quizSection', section);
+        showPayment();
+      });
+    }
+
+    function showPayment() {
+      contentDiv.innerHTML = '';
+      const amount = isRetry ? 20 : (section <= 5 ? 5 : 10);
+      contentDiv.innerHTML = `
+        <h2>Section ${String.fromCharCode(64 + section)}</h2>
+        <p>Payment required: Ksh ${amount}</p>
+        <input id="phone-input" placeholder="Enter phone (e.g., 07XXXXXXXX)" value="${phone}" />
+        <button id="pay-btn">Pay Now</button>
+        <div id="payment-status"></div>
+      `;
+      document.getElementById('pay-btn').addEventListener('click', initiatePayment);
+    }
+
+    async function initiatePayment() {
+      const input = document.getElementById('phone-input');
+      let rawPhone = input.value.trim();
+
+      if (/^07\d{8}$/.test(rawPhone)) {
+        phone = '254' + rawPhone.substring(1);
+      } else if (/^2547\d{8}$/.test(rawPhone)) {
+        phone = rawPhone;
+      } else {
+        alert('Enter valid phone number starting with 07 or 2547');
+        return;
+      }
+
+      localStorage.setItem('quizPhone', rawPhone);
+      document.getElementById('payment-status').innerText = 'Processing payment...';
+
+      // Note: the new backend uses a fixed amount for flyer payments.
+      // For your quiz flow we still send the amount so backend can log it (backend will ignore or use fixed amount).
+      const payload = {
+        phone: phone,
+        // keep the existing amount semantics for quiz (backend will use its fixed price if configured)
+        amount: isRetry ? 20 : (section <= 5 ? 5 : 10),
+        event: 'quiz-section', // optional metadata
+        template: `section-${section}`
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_BASE}/api/mpesa/stk`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          // try to read error body
+          const errText = await res.text().catch(() => '');
+          document.getElementById('payment-status').innerText = `Payment initiation failed: ${res.status} ${res.statusText} ${errText}`;
+          return;
+        }
+
+        const data = await res.json();
+
+        // Backend returns { checkoutId, data } — handle both old and new shapes
+        const checkoutId = data.checkoutId || data.CheckoutRequestID || data?.data?.CheckoutRequestID;
+        const darajaData = data.data || data;
+
+        if (checkoutId) {
+          document.getElementById('payment-status').innerText = 'STK Push sent. Enter your M-PESA PIN.';
+          // poll /api/mpesa/status?checkoutId=...
+          const interval = setInterval(async () => {
+            try {
+              const statusRes = await fetch(`${BACKEND_BASE}/api/mpesa/status?checkoutId=${encodeURIComponent(checkoutId)}`);
+              if (!statusRes.ok) {
+                // fallback to old phone-based status if available
+                const fallbackRes = await fetch(`${BACKEND_BASE}/status?phone=${encodeURIComponent(phone)}`).catch(() => null);
+                if (fallbackRes && fallbackRes.ok) {
+                  const fallbackData = await fallbackRes.json();
+                  if (fallbackData.status && fallbackData.status !== 'Pending') {
+                    clearInterval(interval);
+                    handleStatusResult(fallbackData.status);
+                  }
+                }
+                return;
+              }
+              const statusData = await statusRes.json();
+              // statusData.status expected to be 'Pending' | 'Success' | 'Failed'
+              if (statusData.status && statusData.status !== 'Pending') {
+                clearInterval(interval);
+                handleStatusResult(statusData.status);
+              }
+            } catch (pollErr) {
+              console.error('Status poll error', pollErr);
+            }
+          }, 3000);
+        } else if (darajaData && (darajaData.ResponseCode === '0' || darajaData.ResponseCode === 0)) {
+          // older style response from Daraja inside 'data'
+          document.getElementById('payment-status').innerText = 'STK Push sent. Enter your M-PESA PIN.';
+          // fallback polling by phone
+          const interval = setInterval(async () => {
+            try {
+              const statusRes = await fetch(`${BACKEND_BASE}/status?phone=${encodeURIComponent(phone)}`);
+              if (!statusRes.ok) return;
+              const statusData = await statusRes.json();
+              if (statusData.status && statusData.status !== 'Pending') {
+                clearInterval(interval);
+                handleStatusResult(statusData.status);
+              }
+            } catch (pollErr) {
+              console.error('Status poll error', pollErr);
+            }
+          }, 3000);
+        } else {
+          document.getElementById('payment-status').innerText = 'Payment request failed.';
+          console.warn('Unexpected payment response', data);
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('payment-status').innerText = 'Error initiating payment.';
+      }
+    }
+
+    function handleStatusResult(status) {
+      const statusTextEl = document.getElementById('payment-status');
+      if (status === 'Success' || status === 'success' || status === 0) {
+        statusTextEl.innerText = 'Payment confirmed — loading quiz...';
+        // clear retry flag
+        isRetry = false;
+        localStorage.setItem('quizRetry', 'false');
+        // navigate to quiz
+        setTimeout(() => { window.location.href = 'quiz.html'; }, 800);
+      } else {
+        statusTextEl.innerText = 'Payment failed: ' + status;
+        isRetry = true;
+        localStorage.setItem('quizRetry', 'true');
+        setTimeout(showPayment, 2000);
+      }
+    }
+
+    async function loadQuestionsFromSheet() {
+      const field = localStorage.getItem('quizField') || 'default';
+      const sectionIndex = parseInt(localStorage.getItem('quizSection')) || 1;
+      const sheetURL = window.SHEET_CONFIG?.sheets?.[field] || window.SHEET_CONFIG?.default;
+
+      try {
+        const res = await fetch(sheetURL);
+        const text = await res.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const startIndex = (sectionIndex - 1) * 10;
+        questions = rows.slice(startIndex, startIndex + 10).map(row => ({
+          question: row.c[0]?.v || '',
+          answer: row.c[1]?.v || ''
+        }));
+
+        if (questions.length < 1) {
+          contentDiv.innerHTML = '<p>No questions found for this section.</p>';
+          return;
+        }
+
+        showQuiz();
+      } catch (error) {
+        console.error('Error loading sheet:', error);
+        contentDiv.innerHTML = '<p>Failed to load questions.</p>';
+      }
+    }
+
+    function showQuiz() {
+      const timeLimit = (section <= 5 || isRetry) ? 60 : 90;
+      let timer = timeLimit;
+
+      contentDiv.innerHTML = `
+        <h2>Section ${String.fromCharCode(64 + section)} Quiz</h2>
+        <form id="quiz-form">
+          ${questions.map((q, i) => `
+            <div>
+              <p><strong>Q${i + 1}:</strong> ${escapeHtml(q.question)}</p>
+              <input type="text" name="q${i}" placeholder="Your answer" required />
+            </div>
+          `).join('')}
+          <p>Time left: <span id="timer">${timer}</span> seconds</p>
+          <button type="submit">Submit Answers</button>
+          <div id="result"></div>
+        </form>
+      `;
+
+      const timerEl = document.getElementById('timer');
+      const countdown = setInterval(() => {
+        timer--;
+        timerEl.innerText = timer;
+        if (timer <= 0) {
+          clearInterval(countdown);
+          document.getElementById('result').innerText = 'Time is up!';
+          handleIncorrect();
+        }
+      }, 1000);
+
+      document.getElementById('quiz-form').addEventListener('submit', e => {
+        e.preventDefault();
+        clearInterval(countdown);
+
+        const formData = new FormData(e.target);
+        let correct = true;
+        for (let i = 0; i < questions.length; i++) {
+          const userAnswer = (formData.get(`q${i}`) || '').trim().toLowerCase();
+          const correctAnswer = (questions[i].answer || '').toLowerCase();
+          if (userAnswer !== correctAnswer) {
+            correct = false;
+            break;
+          }
+        }
+
+        const result = document.getElementById('result');
+        if (correct) {
+          result.innerText = 'All answers correct! Moving to next section.';
+          isRetry = false;
+          section += 1;
+          localStorage.setItem('quizSection', section);
+          localStorage.setItem('quizRetry', 'false');
+          setTimeout(showSectionSelector, 2000);
+        } else {
+          result.innerText = 'Some answers were incorrect. Please retry.';
+          handleIncorrect();
+        }
+      });
+    }
+
+    function handleIncorrect() {
+      isRetry = true;
+      localStorage.setItem('quizRetry', 'true');
+      setTimeout(showPayment, 2000);
+    }
+
+    showSectionSelector();
+  });
+});
+
+async function checkQuizVersion() {
+  try {
+    const metaURL = 'https://docs.google.com/spreadsheets/d/1xRdS5vJ-aUuG_7VcrYgk6StHCuLoOjU4zqG-0I1uHp8/gviz/tq?sheet=Meta&tqx=out:json';
+    const res = await fetch(metaURL);
+    const text = await res.text();
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const versionCell = json.table.rows[0].c[1]?.v;
+
+    const storedVersion = localStorage.getItem('quizVersion');
+
+    if (versionCell && storedVersion !== versionCell) {
+      localStorage.setItem('quizSection', '1');
+      localStorage.setItem('quizRetry', 'false');
+      localStorage.setItem('quizVersion', versionCell);
+    }
+  } catch (err) {
+    console.error('Failed to check quiz version:', err);
+  }
+}
+
+const slideshowVideos = [
+  { url: "https://www.w3schools.com/html/mov_bbb.mp4", caption: "Play smart, win smart!" },
+  { url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm", caption: "Challenge your brain daily" },
+  { url: "https://media.w3.org/2010/05/sintel/trailer.mp4", caption: "New quizzes every week" }
 ];
 
-let state={selectedCategory:Object.keys(CATEGORIES)[0],selectedTemplateId:TEMPLATES[0].id,
-fields:{title:TEMPLATES[0].title,subtitle:'Subtitle',date:'',venue:'',contact:''},
-photoDataUrl:null,paid:false,lastCheckoutId:null};
+let currentVideo = 0;
+const videoEl = document.getElementById('slideshow-video');
+const captionEl = document.getElementById('video-caption');
 
-function showStatus(msg,opt={}){payStatus.textContent=msg;payStatus.style.color=opt.error?'#b91c1c':'#374151';}
-function getTemplate(){return TEMPLATES.find(t=>t.id===state.selectedTemplateId)||TEMPLATES[0];}
-
-// render helpers
-function renderCategories(){
- categoriesEl.innerHTML='';
- Object.keys(CATEGORIES).forEach(c=>{
-  const b=document.createElement('button');b.className='cat-btn'+(state.selectedCategory===c?' active':'');
-  b.textContent=c;b.onclick=()=>{state.selectedCategory=c;renderTemplates();renderCategories();};
-  categoriesEl.appendChild(b);
- });
+function showVideo(index) {
+  if (!videoEl || !captionEl) return;
+  currentVideo = (index + slideshowVideos.length) % slideshowVideos.length;
+  videoEl.pause();
+  videoEl.src = slideshowVideos[currentVideo].url;
+  captionEl.textContent = slideshowVideos[currentVideo].caption;
+  videoEl.load();
+  videoEl.muted = true;
+  videoEl.play().catch(() => {});
 }
-function renderTemplates(){
- templatesGridEl.innerHTML='';
- TEMPLATES.filter(t=>t.category===state.selectedCategory).forEach(t=>{
-  const d=document.createElement('div');d.className='template-card';
-  d.innerHTML=`<div class='template-thumb' style='background:${t.bg}'>${t.title.split(' ')[0]}</div>
-               <div class='template-meta'><h4>${t.title}</h4><p>${t.category} • KES ${t.price}</p></div>`;
-  d.onclick=()=>selectTemplate(t.id);templatesGridEl.appendChild(d);
- });
-}
-function renderTemplateSelect(){
- templateSelectEl.innerHTML='';TEMPLATES.forEach(t=>{const o=document.createElement('option');
- o.value=t.id;o.textContent=`${t.title} — KES ${t.price}`;templateSelectEl.appendChild(o);});
- templateSelectEl.value=state.selectedTemplateId;priceSpan.textContent=getTemplate().price;
- flierPriceTag.textContent='KES '+getTemplate().price;
-}
-function renderPreview(){
- const f=state.fields,t=getTemplate();
- flierTitle.textContent=f.title||'Title';flierSubtitle.textContent=f.subtitle;
- flierDate.textContent=f.date||'TBA';flierVenue.textContent=f.venue||'TBA';flierContact.textContent=f.contact||'TBA';
- if(state.photoDataUrl){heroArea.innerHTML=`<img src='${state.photoDataUrl}' style='width:100%;height:100%;object-fit:cover'>`;}
- else{heroArea.style.background=t.bg;heroArea.style.color=t.color;heroArea.innerHTML=`<div style='text-align:center'><b>${f.title}</b><div>${t.category}</div></div>`;}
-}
-function selectTemplate(id){state.selectedTemplateId=id;state.fields.title=getTemplate().title;renderTemplateSelect();renderPreview();}
 
-// inputs
-[titleInput,subtitleInput,dateInput,venueInput,contactInput].forEach(inp=>{
- inp.oninput=()=>{state.fields[inp.id.replace('Input','')]=inp.value;renderPreview();}
-});
-photoInput.onchange=e=>{
- const f=e.target.files[0];if(!f)return;const r=new FileReader();
- r.onload=ev=>{state.photoDataUrl=ev.target.result;renderPreview();};r.readAsDataURL(f);
-};
-
-// backend helpers
-async function initiatePayment(phone,amount){
- const r=await fetch(`${BACKEND_BASE}/pay`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,amount})});
- const j=await r.json();if(!r.ok)throw j;return j;
+function changeVideo(step) {
+  showVideo(currentVideo + step);
 }
-async function pollStatus(phone,timeout=90000,interval=3000){
- const start=Date.now();while(Date.now()-start<timeout){
-  const r=await fetch(`${BACKEND_BASE}/status?phone=${phone}`);if(r.status===404){await new Promise(r=>setTimeout(r,interval));continue;}
-  const j=await r.json();if(j.status!=='Pending')return j;await new Promise(r=>setTimeout(r,interval));
- }throw new Error('Timed out waiting for payment confirmation.');
+
+setInterval(() => changeVideo(1), 5000);
+
+document.addEventListener('DOMContentLoaded', () => showVideo(0));
+
+function goToAdmin() {
+  const password = prompt("Enter admin password:");
+  if (password === "@perontips.") {
+    localStorage.setItem("isAdmin", "true");
+    window.location.href = "admin.html";
+  } else {
+    alert("Access denied! Wrong password.");
+  }
 }
-function normalizePhone(p){if(!p)return null;const c=p.replace(/\s|\+|-/g,'');
- if(/^7\d{8}$/.test(c))return'0'+c;if(/^07\d{8}$/.test(c))return c;if(/^2547\d{8}$/.test(c))return c;return null;}
 
-// payment
-buyBtn.onclick=async()=>{
- const phone=normalizePhone(paymentPhoneInput.value);const amt=Number(amountInput.value);
- if(!phone)return showStatus('Enter valid phone 07XXXXXXXX',{error:true});
- if(!amt||amt<=0)return showStatus('Enter valid amount',{error:true});
- if(amt>MAX_AMOUNT)return showStatus(`Max KES ${MAX_AMOUNT}`,{error:true});
- showStatus('Sending STK push...');buyBtn.disabled=true;
- try{
-  const init=await initiatePayment(phone,amt);state.lastCheckoutId=init.checkoutId;
-  showStatus('Check your phone and approve payment...');
-  const res=await pollStatus(phone);if(/success/i.test(res.status)){state.paid=true;showStatus('Payment confirmed. You can download now.');buyBtn.textContent='Paid ✓';buyBtn.style.background='#10b981';}
-  else{showStatus('Payment failed — '+(res.resultDesc||res.status),{error:true});buyBtn.disabled=false;}
- }catch(e){console.error(e);showStatus('Error '+(e.message||JSON.stringify(e)),{error:true});buyBtn.disabled=false;}
-};
-
-// reset/save/download
-resetPaymentBtn.onclick=()=>{state.paid=false;buyBtn.disabled=false;buyBtn.textContent=`Buy (KES ${getTemplate().price})`;showStatus('');};
-saveDraftBtn.onclick=()=>{const d=JSON.parse(localStorage.getItem('peron_drafts')||'[]');d.push({...state});localStorage.setItem('peron_drafts',JSON.stringify(d));alert('Draft saved');};
-downloadBtn.onclick=async()=>{if(!state.paid)return alert('Pay first');const c=await html2canvas(document.getElementById('flierPreview'),{scale:2});const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='flier.png';a.click();};
-downloadPDFBtn.onclick=async()=>{if(!state.paid)return alert('Pay first');const c=await html2canvas(document.getElementById('flierPreview'),{scale:2});const w=window.open('');w.document.write('<img src="'+c.toDataURL('image/png')+'" style="max-width:100%">');w.document.close();};
-
-// init
-renderCategories();renderTemplates();renderTemplateSelect();renderPreview();
+// small helper to avoid HTML injection
+function escapeHtml(s){
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+         }
